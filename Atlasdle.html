@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlasdle — Banderas y capitales del mundo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12;
+  --surface:#151822;
+  --surface-alt:#1c202b;
+  --surface-raised:#1f2430;
+  --text-dim:#8991a3;
+  --text-dimmer:#6b7386;
+  --text-body:#aab2c4;
+  --title-teal:#5eead4;
+  --title-teal-deep:#2dd4bf;
+  --title-gold:#f8c95c;
+  --title-gold-deep:#e0a72e;
+  --accent-pink:#ff7597;
+  --accent-pink-deep:#ff4d73;
+  --select-blue:#4da3ff;
+  --select-blue-deep:#2f7fe0;
+  --line: rgba(255,255,255,0.09);
+  --line-strong: rgba(255,255,255,0.16);
+  --radius-card: 14px;
+  --radius-chip: 999px;
+  --shadow-card: 0 14px 34px rgba(0,0,0,0.5);
+  --font-display: "Fraunces", serif;
+  --font-body: "Work Sans", sans-serif;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text-body);
+  line-height:1.5;
+}
+button{font-family:inherit;}
+input{font-family:inherit;}
+
+/* ---------- Ghost-flags background ---------- */
+.flag-bg{
+  position:fixed; inset:-40px;
+  z-index:0;
+  overflow:hidden;
+  display:grid;
+  gap:6px;
+  padding:6px;
+  filter:saturate(1.05) blur(3px);
+  opacity:0.55;
+  transition:opacity .4s ease, filter .4s ease;
+}
+.flag-bg img{
+  width:100%; height:100%;
+  object-fit:cover;
+  border-radius:5px;
+  display:block;
+  transform-origin:center;
+  box-shadow:0 4px 14px rgba(0,0,0,0.35);
+}
+.flag-bg-scrim{
+  position:fixed; inset:0;
+  z-index:1;
+  background:radial-gradient(120% 120% at 50% 30%, rgba(11,13,18,0.45) 0%, rgba(11,13,18,0.72) 70%, rgba(11,13,18,0.85) 100%);
+  pointer-events:none;
+  transition:background .3s ease;
+}
+.app{position:relative; z-index:2; max-width:640px; margin:0 auto; padding:0 0 64px;}
+
+/* ---------- Screen transition ---------- */
+.screen-enter{animation:screenIn .38s cubic-bezier(.2,.7,.3,1) both;}
+@keyframes screenIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* ---------- Hero ---------- */
+.hero{
+  background:radial-gradient(120% 140% at 100% 0%, #1a2030 0%, #0d0f16 55%, #0a0b10 100%);
+  padding:36px 22px 46px;
+  position:relative;
+  overflow:hidden;
+  border-bottom:1px solid var(--line-strong);
+}
+.hero-compass{
+  position:absolute;
+  right:-38px; top:-38px;
+  width:150px; height:150px;
+  opacity:0.14;
+}
+.hero-eyebrow{
+  font-size:13px;
+  letter-spacing:0.02em;
+  color:var(--title-gold);
+  margin:0 0 6px;
+  font-weight:600;
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:clamp(2.2rem, 9vw, 3rem);
+  margin:0 0 10px;
+  letter-spacing:-0.01em;
+  line-height:1.02;
+  background:linear-gradient(100deg, var(--title-teal) 10%, var(--title-gold) 60%, var(--accent-pink) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero p{
+  margin:0;
+  max-width:46ch;
+  color:var(--text-dim);
+  font-size:15.5px;
+}
+
+/* ---------- Language toggle ---------- */
+.lang-toggle{
+  position:absolute; top:16px; right:16px; z-index:3;
+  display:flex; gap:4px;
+  background:rgba(0,0,0,0.35);
+  border:1px solid var(--line-strong);
+  border-radius:999px;
+  padding:3px;
+  backdrop-filter:blur(6px);
+}
+.lang-btn{
+  border:none; background:transparent; color:var(--text-dim);
+  border-radius:999px; padding:6px 12px;
+  font-size:12px; font-weight:700; letter-spacing:0.04em;
+  cursor:pointer; transition:background .15s ease, color .15s ease;
+}
+.lang-btn.active{background:var(--title-teal); color:#06231f;}
+body.hard-mode .lang-btn.active{background:var(--accent-pink); color:#2a0410;}
+
+/* ---------- Section shell ---------- */
+.section{padding:22px 22px 0;}
+.section h2{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:1.32rem;
+  margin:0 0 4px;
+  color:var(--title-teal);
+}
+.section .hint{margin:0 0 14px; font-size:13.5px; color:var(--text-dim);}
+
+/* ---------- Daily challenge stamp ---------- */
+.stamp-card{
+  background:var(--surface);
+  border:2px dashed var(--title-gold-deep);
+  border-radius:16px;
+  padding:18px 18px 16px;
+  position:relative;
+  transform:rotate(-0.6deg);
+  box-shadow:var(--shadow-card);
+  animation:stampSettle .5s cubic-bezier(.2,.8,.3,1.2) both;
+}
+@keyframes stampSettle{
+  from{opacity:0; transform:rotate(-6deg) scale(0.92);}
+  to{opacity:1; transform:rotate(-0.6deg) scale(1);}
+}
+.stamp-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+.stamp-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(248,201,92,0.14); color:var(--title-gold);
+  font-size:12px; font-weight:600;
+  padding:5px 10px; border-radius:999px;
+  letter-spacing:0.02em;
+}
+.stamp-flag{font-size:2.4rem; line-height:1;}
+.stamp-flag img{
+  width:auto; height:36px; max-width:64px;
+  object-fit:contain;
+  border-radius:5px; box-shadow:0 3px 8px rgba(0,0,0,0.4);
+  vertical-align:middle; background:rgba(0,0,0,0.25);
+}
+.stamp-title{font-family:var(--font-display); font-weight:700; font-size:1.15rem; margin:0; color:var(--title-gold);}
+.stamp-sub{font-size:13px; color:var(--text-dim); margin:2px 0 0;}
+.streak-pill{
+  font-size:12.5px; font-weight:600; color:var(--title-teal);
+  background:rgba(94,234,212,0.12);
+  padding:4px 9px; border-radius:999px; white-space:nowrap;
+}
+.stamp-body{display:flex; align-items:center; gap:14px; margin-top:8px;}
+.btn-daily{margin-top:12px; width:100%;}
+
+/* ---------- Mode cards ---------- */
+.mode-grid{display:flex; flex-direction:column; gap:10px;}
+.mode-card{
+  display:flex; align-items:center; gap:12px;
+  background:var(--surface-alt); border:1px solid var(--line);
+  border-radius:var(--radius-card);
+  padding:13px 14px;
+  cursor:pointer; text-align:left; width:100%;
+  color:var(--text-body);
+  transition:border-color .15s ease, background .15s ease, transform .15s ease;
+}
+.mode-card:hover{border-color:var(--title-teal-deep); transform:translateY(-1px);}
+.mode-card.active{
+  border-color:var(--title-teal-deep);
+  background:rgba(94,234,212,0.09);
+  box-shadow:0 0 0 1px var(--title-teal-deep) inset;
+}
+.mode-icon{font-size:1.6rem; width:34px; text-align:center; flex-shrink:0;}
+.mode-text strong{display:block; font-size:15px; color:#e4e7ee;}
+.mode-text span{display:block; font-size:12.5px; color:var(--text-dim); margin-top:1px;}
+
+/* ---------- Chip rows ---------- */
+.chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{
+  border:1px solid var(--line);
+  background:var(--surface-alt);
+  border-radius:var(--radius-chip);
+  padding:8px 14px;
+  font-size:13.5px; font-weight:500;
+  cursor:pointer; color:var(--text-body);
+  transition:transform .12s ease, background .12s ease;
+}
+.chip:hover{transform:translateY(-1px);}
+.chip.active{
+  background:var(--title-teal);
+  border-color:var(--title-teal);
+  color:#06231f; font-weight:600;
+}
+.count-row{display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap;}
+.count-input{
+  width:130px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px 12px;
+  font-size:15px;
+  background:var(--surface-raised);
+  color:#e4e7ee;
+}
+.count-input::placeholder{color:var(--text-dimmer); font-size:13px;}
+.count-input:focus{outline:2px solid var(--title-teal-deep); outline-offset:1px;}
+.count-avail{font-size:12.5px; color:var(--text-dimmer);}
+
+/* ---------- Toggle pair (difficulty) ---------- */
+.toggle-pair{display:flex; gap:10px;}
+.toggle-opt{
+  flex:1;
+  border:1px solid var(--line);
+  background:var(--surface-alt);
+  border-radius:var(--radius-card);
+  padding:12px 10px;
+  text-align:center;
+  cursor:pointer;
+  transition:transform .12s ease;
+}
+.toggle-opt:hover{transform:translateY(-1px);}
+.toggle-opt strong{display:block; font-size:14px; color:#e4e7ee;}
+.toggle-opt span{display:block; font-size:12px; color:var(--text-dim); margin-top:2px;}
+.toggle-opt.active{
+  border-color:var(--title-gold-deep);
+  background:rgba(248,201,92,0.13);
+  box-shadow:0 0 0 1px var(--title-gold-deep) inset;
+}
+.toggle-opt.danger{
+  border-color:var(--accent-pink-deep);
+  background:rgba(255,77,115,0.15);
+  box-shadow:0 0 0 1px var(--accent-pink-deep) inset, 0 0 24px rgba(255,77,115,0.45);
+}
+.toggle-opt.danger strong, .toggle-opt.danger span{color:var(--accent-pink);}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  border:none; border-radius:11px;
+  padding:14px 18px;
+  font-size:15.5px; font-weight:600;
+  cursor:pointer;
+  transition:transform .1s ease, filter .15s ease;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--title-teal); color:#06231f;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent; color:var(--text-body); border:1px solid var(--line);}
+.btn-ghost:hover{border-color:var(--line-strong);}
+.btn-gold{background:var(--title-gold); color:#2a1c00;}
+.btn-gold:hover{filter:brightness(1.08);}
+.btn-block{width:100%;}
+.btn:disabled{opacity:0.4; cursor:not-allowed;}
+.start-bar{padding:22px 22px 0;}
+
+/* ---------- Quiz screen ---------- */
+.quiz-top{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 22px 0; gap:10px;
+}
+.quiz-progress{font-size:13px; font-weight:600; color:var(--text-dim);}
+.quiz-score{font-size:13px; font-weight:600; color:var(--title-teal);}
+.progress-track{
+  height:6px; background:var(--surface-alt); border-radius:999px;
+  margin:8px 22px 0; overflow:hidden;
+}
+.progress-fill{height:100%; background:linear-gradient(90deg, var(--title-teal), var(--title-gold)); transition:width .3s ease;}
+
+.card{
+  margin:18px 22px 0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow-card);
+  padding:26px 20px;
+  text-align:center;
+  animation:cardIn .3s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes cardIn{
+  from{opacity:0; transform:scale(0.96) translateY(6px);}
+  to{opacity:1; transform:scale(1) translateY(0);}
+}
+.card-eyebrow{font-size:12.5px; font-weight:600; color:var(--title-teal); margin:0 0 10px;}
+.big-flag{display:flex; justify-content:center; margin:6px 0 4px; animation:flagPop .45s cubic-bezier(.3,1.3,.4,1) both;}
+.big-flag img{
+  max-width:64vw; max-height:120px;
+  width:auto; height:auto;
+  object-fit:contain;
+  border-radius:10px;
+  box-shadow:0 8px 22px rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.2);
+}
+.flag-inline{
+  width:24px; height:16px;
+  object-fit:contain;
+  border-radius:2px; vertical-align:middle; margin-right:5px;
+  background:rgba(0,0,0,0.25);
+}
+@keyframes flagPop{
+  from{opacity:0; transform:scale(0.7) rotate(-6deg);}
+  to{opacity:1; transform:scale(1) rotate(0);}
+}
+.card-name{font-family:var(--font-display); font-weight:700; font-size:1.6rem; margin:4px 0 0; color:var(--title-gold);}
+.card-question{font-size:15.5px; color:var(--text-dim); margin:10px 0 0;}
+
+.answer-block{padding:16px 22px 0;}
+.option-list{display:flex; flex-direction:column; gap:9px;}
+.option-btn{
+  border:1px solid var(--line);
+  background:var(--surface-alt);
+  border-radius:12px;
+  padding:13px 14px;
+  font-size:15px;
+  text-align:left;
+  cursor:pointer;
+  color:var(--text-body);
+  transition:transform .1s ease, border-color .12s ease, background .12s ease;
+}
+.option-btn:hover:not(:disabled){transform:translateX(2px); border-color:var(--line-strong);}
+.option-btn.selected{border-color:var(--select-blue); box-shadow:0 0 0 1px var(--select-blue) inset; background:rgba(77,163,255,0.12); color:#eaf2ff; animation:selectPulse .35s ease;}
+@keyframes selectPulse{0%{transform:scale(1);} 45%{transform:scale(1.025);} 100%{transform:scale(1);}}
+.option-btn.correct{border-color:#5eead4; background:rgba(94,234,212,0.16); box-shadow:0 0 0 1px #5eead4 inset; color:#e4e7ee; animation:pulseOk .5s ease;}
+.option-btn.wrong{border-color:var(--accent-pink); background:rgba(255,117,151,0.12); box-shadow:0 0 0 1px var(--accent-pink) inset; color:#e4e7ee; animation:shake .35s ease;}
+.option-btn:disabled{cursor:default;}
+@keyframes pulseOk{0%{transform:scale(1);} 40%{transform:scale(1.03);} 100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);}}
+
+.field-label{font-size:13px; font-weight:600; color:var(--text-dim); margin:14px 0 6px; display:block;}
+.field-label:first-child{margin-top:0;}
+.text-input{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:13px 14px;
+  font-size:16px;
+  background:var(--surface-raised);
+  color:#e4e7ee;
+  transition:border-color .12s ease;
+}
+.text-input::placeholder{color:var(--text-dimmer);}
+.text-input:focus{outline:2px solid var(--title-teal-deep); outline-offset:1px;}
+.text-input.correct{border-color:#5eead4; background:rgba(94,234,212,0.08);}
+.text-input.wrong{border-color:var(--accent-pink); background:rgba(255,117,151,0.08); animation:shake .35s ease;}
+.input-note{font-size:12px; color:var(--text-dimmer); margin:6px 0 0;}
+
+.feedback-banner{
+  margin:14px 22px 0;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:14px;
+  font-weight:600;
+  animation:cardIn .25s ease both;
+}
+.feedback-banner.ok{background:rgba(94,234,212,0.13); color:#5eead4;}
+.feedback-banner.bad{background:rgba(255,117,151,0.11); color:var(--accent-pink);}
+.feedback-banner .answer-line{font-weight:500; display:block; margin-top:3px; color:var(--text-dim);}
+.confetti-row{display:inline-flex; gap:6px; margin-left:8px;}
+.confetti-row span{display:inline-block; animation:confettiPop .6s ease both;}
+.confetti-row span:nth-child(2){animation-delay:.08s;}
+.confetti-row span:nth-child(3){animation-delay:.16s;}
+@keyframes confettiPop{
+  0%{opacity:0; transform:translateY(4px) scale(0.5) rotate(0deg);}
+  60%{opacity:1; transform:translateY(-6px) scale(1.15) rotate(12deg);}
+  100%{opacity:1; transform:translateY(0) scale(1) rotate(0deg);}
+}
+
+/* ---------- Facts card ---------- */
+.facts-card{
+  margin:14px 22px 0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 16px 10px;
+  animation:cardIn .3s cubic-bezier(.2,.7,.3,1) both;
+}
+.facts-title{
+  font-family:var(--font-display);
+  font-weight:700; font-size:1rem;
+  color:var(--title-gold);
+  margin:0 0 8px;
+}
+.facts-title.city{color:var(--title-teal);}
+.fact-row{
+  display:flex; gap:12px; align-items:baseline;
+  justify-content:space-between;
+  font-size:13.5px;
+  padding:6px 0;
+  border-bottom:1px dashed var(--line);
+}
+.fact-row:last-child{border-bottom:none;}
+.fact-row span{color:var(--text-dim); flex-shrink:0;}
+.fact-row strong{color:#e4e7ee; font-weight:600; text-align:right;}
+
+.action-bar{padding:18px 22px 0; display:flex; gap:10px;}
+
+/* ---------- Results ---------- */
+.result-hero{
+  margin:20px 22px 0;
+  background:linear-gradient(160deg, #171b26, #0d0f16);
+  border:1px solid var(--line-strong);
+  border-radius:18px;
+  padding:26px 20px;
+  text-align:center;
+  animation:cardIn .35s cubic-bezier(.2,.7,.3,1) both;
+}
+.result-score{
+  font-family:var(--font-display); font-weight:800; font-size:2.6rem; margin:0;
+  background:linear-gradient(100deg, var(--title-teal), var(--title-gold));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.result-label{font-size:13.5px; color:var(--text-dim); margin:4px 0 0;}
+.review-list{padding:18px 22px 0; display:flex; flex-direction:column; gap:8px;}
+.review-item{
+  display:flex; align-items:flex-start; gap:10px;
+  border:1px solid var(--line);
+  background:var(--surface-alt);
+  border-radius:12px; padding:11px 12px;
+  font-size:13.5px;
+}
+.review-item .mark{font-size:15px; flex-shrink:0;}
+.review-item .txt strong{display:block; font-size:14px; color:#e4e7ee;}
+.review-item .txt span{color:var(--text-dim); display:block; margin-top:1px;}
+.result-actions{padding:18px 22px 0; display:flex; flex-direction:column; gap:10px;}
+
+/* ---------- Daily play screen ---------- */
+.daily-card{margin:18px 22px 0;}
+.hint-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; justify-content:center;}
+.hint-chip{
+  font-size:12.5px; font-weight:600;
+  background:rgba(248,201,92,0.15); color:var(--title-gold);
+  border-radius:999px; padding:5px 11px;
+  animation:cardIn .25s ease both;
+}
+.attempts-row{display:flex; gap:6px; justify-content:center; margin-top:10px;}
+.attempt-dot{width:9px; height:9px; border-radius:50%; background:var(--surface-alt); border:1px solid var(--line);}
+.attempt-dot.used-ok{background:#5eead4;}
+.attempt-dot.used-bad{background:var(--accent-pink);}
+
+footer{padding:30px 22px 0; text-align:center; font-size:12px; color:var(--text-dimmer);}
+
+@media (min-width:560px){
+  .toggle-pair, .action-bar, .result-actions{flex-direction:row;}
+  .mode-grid{flex-direction:row;}
+  .mode-card{flex-direction:column; text-align:center; align-items:center;}
+}
+@media (prefers-reduced-motion: reduce){
+  .btn, .card, .stamp-card, .big-flag, .option-btn, .feedback-banner, .result-hero, .screen-enter, .confetti-row span, .facts-card{animation:none !important; transition:none !important;}
+}
+
+/* ---------- Hard-mode red theme ---------- */
+body.hard-mode{
+  --title-teal: var(--accent-pink);
+  --title-teal-deep: var(--accent-pink-deep);
+}
+body.hard-mode .hero{
+  background:radial-gradient(120% 140% at 100% 0%, #301019 0%, #170a0d 55%, #0a0b10 100%);
+}
+body.hard-mode .flag-bg-scrim{background:#1a0308; opacity:0.68;}
+button:focus-visible{outline:2px solid var(--title-teal-deep); outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="flag-bg" id="flag-bg" aria-hidden="true"></div>
+<div class="flag-bg-scrim" aria-hidden="true"></div>
+<div class="app" id="app"></div>
+
+<script>
+/* =========================================================
+   i18n
+   ========================================================= */
+const STR = {
+  es:{
+    eyebrow:"Geografía en modo juego",
+    tagline:"Aprende y pon a prueba banderas y capitales del mundo, continente por continente, a tu propio ritmo.",
+    dailyBadge:"RETO DIARIO",
+    noStreak:"Sin racha aún",
+    streak:n=>"🔥 Racha: "+n,
+    loadingDaily:"Cargando reto de hoy…",
+    dailySolved:"¡Resuelto por hoy!",
+    dailyGone:"Reto de hoy agotado",
+    dailyComeBack:"Vuelve mañana para seguir tu racha.",
+    dailyAnswerWas:(n,c)=>"La respuesta era "+n+" · "+c+".",
+    viewDaily:"Ver reto de hoy",
+    dailyTitle:"Reto diario",
+    dailySub:"Un país nuevo cada día. Adivina la bandera y la capital.",
+    playDaily:"Jugar el reto de hoy",
+    modeTitle:"Elige un modo",
+    modeHint:"Practica solo banderas, solo capitales, o ambas a la vez.",
+    mFlags:"Solo banderas", mFlagsSub:"Adivina el país por su bandera",
+    mCaps:"Solo capitales", mCapsSub:"Adivina la capital de cada país",
+    mBoth:"Banderas y capitales", mBothSub:"Ambas cosas en cada pregunta",
+    regionTitle:"Elige una región",
+    regionHint:"Juega con todo el mundo o enfócate en un continente.",
+    global:"Global",
+    diffTitle:"Elige la dificultad",
+    diffHint:"Ignoramos mayúsculas, tildes y espacios extra al escribir.",
+    easy:"Fácil", easySub:"Elegir entre opciones",
+    hard:"Difícil", hardSub:"Escribir la respuesta",
+    lenTitle:"¿Cuántas preguntas?",
+    lenHint:"Elige un número o juega con todas las disponibles.",
+    all:"Todas",
+    customPh:"Otro número",
+    available:n=>n+" países disponibles",
+    start:"Comenzar",
+    footer:"Hecho para aprender geografía, una bandera a la vez.",
+    q:"Pregunta", of:"de", score:"Aciertos",
+    whatCountry:"¿Qué país es?", whatCapital:"¿Cuál es su capital?", bothQ:"¿Qué país es y cuál es su capital?",
+    country:"País", capital:"Capital",
+    writeCountry:"Escribe el país", writeCapital:"Escribe la capital",
+    note:"No importan mayúsculas, tildes ni espacios de más.",
+    check:"Comprobar", next:"Siguiente", seeResults:"Ver resultados",
+    ok:"¡Correcto!", bad:"No era esa",
+    exit:"Salir a inicio",
+    perfect:"Puntaje perfecto", great:"¡Muy bien!", onTrack:"Vas por buen camino", keep:"Sigue practicando",
+    again:"Jugar de nuevo", changeCfg:"Cambiar configuración",
+    dailyChallenge:"Reto diario",
+    writeBoth:"Escribe el país y su capital",
+    attempts:n=>"Tienes "+n+" intento(s).",
+    continent:"Continente",
+    startsWith:x=>'El país empieza con "'+x+'"',
+    capStartsWith:x=>'La capital empieza con "'+x+'"',
+    solvedTomorrow:"¡Resuelto! Vuelve mañana.",
+    noMoreTries:"Se acabaron los intentos. ¡Vuelve mañana!",
+    backHome:"Volver al inicio",
+    aboutCountry:"Sobre el país", aboutCity:"Sobre la ciudad",
+    population:"Población", currency:"Moneda", language:"Idioma",
+    fact:"Dato destacado", cityFact:"Qué saber",
+    millions:n=>n+" millones",
+  },
+  en:{
+    eyebrow:"Geography, game mode",
+    tagline:"Learn and test yourself on the world's flags and capitals, continent by continent, at your own pace.",
+    dailyBadge:"DAILY CHALLENGE",
+    noStreak:"No streak yet",
+    streak:n=>"🔥 Streak: "+n,
+    loadingDaily:"Loading today's challenge…",
+    dailySolved:"Solved for today!",
+    dailyGone:"Today's challenge is over",
+    dailyComeBack:"Come back tomorrow to keep your streak.",
+    dailyAnswerWas:(n,c)=>"The answer was "+n+" · "+c+".",
+    viewDaily:"See today's challenge",
+    dailyTitle:"Daily challenge",
+    dailySub:"A new country every day. Guess the flag and the capital.",
+    playDaily:"Play today's challenge",
+    modeTitle:"Pick a mode",
+    modeHint:"Practise flags only, capitals only, or both at once.",
+    mFlags:"Flags only", mFlagsSub:"Guess the country from its flag",
+    mCaps:"Capitals only", mCapsSub:"Guess the capital of each country",
+    mBoth:"Flags & capitals", mBothSub:"Both in every question",
+    regionTitle:"Pick a region",
+    regionHint:"Play the whole world or focus on one continent.",
+    global:"Global",
+    diffTitle:"Pick a difficulty",
+    diffHint:"We ignore capitals, accents and extra spaces when typing.",
+    easy:"Easy", easySub:"Choose from options",
+    hard:"Hard", hardSub:"Type the answer",
+    lenTitle:"How many questions?",
+    lenHint:"Pick a number, or play with every country available.",
+    all:"All",
+    customPh:"Other number",
+    available:n=>n+" countries available",
+    start:"Start",
+    footer:"Made for learning geography, one flag at a time.",
+    q:"Question", of:"of", score:"Score",
+    whatCountry:"Which country is it?", whatCapital:"What is its capital?", bothQ:"Which country is it and what is its capital?",
+    country:"Country", capital:"Capital",
+    writeCountry:"Type the country", writeCapital:"Type the capital",
+    note:"Capitals, accents and extra spaces don't matter.",
+    check:"Check", next:"Next", seeResults:"See results",
+    ok:"Correct!", bad:"Not that one",
+    exit:"Back to start",
+    perfect:"Perfect score", great:"Great job!", onTrack:"You're on track", keep:"Keep practising",
+    again:"Play again", changeCfg:"Change settings",
+    dailyChallenge:"Daily challenge",
+    writeBoth:"Type the country and its capital",
+    attempts:n=>"You have "+n+" attempt(s).",
+    continent:"Continent",
+    startsWith:x=>'The country starts with "'+x+'"',
+    capStartsWith:x=>'The capital starts with "'+x+'"',
+    solvedTomorrow:"Solved! See you tomorrow.",
+    noMoreTries:"Out of attempts. See you tomorrow!",
+    backHome:"Back to start",
+    aboutCountry:"About the country", aboutCity:"About the city",
+    population:"Population", currency:"Currency", language:"Language",
+    fact:"Claim to fame", cityFact:"Known for",
+    millions:n=>n+" million",
+  }
+};
+
+const CONTINENTS = {
+  AF:{es:"África", en:"Africa"},
+  AS:{es:"Asia", en:"Asia"},
+  EU:{es:"Europa", en:"Europe"},
+  NA:{es:"América del Norte", en:"North America"},
+  SA:{es:"América del Sur", en:"South America"},
+  OC:{es:"Oceanía", en:"Oceania"},
+};
+
+/* =========================================================
+   DATA — [nombreES, nombreEN, capitalES, capitalEN, continente, código]
+   ========================================================= */
+const RAW = [
+["Argelia","Algeria","Argel","Algiers","AF","DZ"],["Angola","Angola","Luanda","Luanda","AF","AO"],
+["Benín","Benin","Porto Novo","Porto-Novo","AF","BJ"],["Botsuana","Botswana","Gaborone","Gaborone","AF","BW"],
+["Burkina Faso","Burkina Faso","Uagadugú","Ouagadougou","AF","BF"],["Burundi","Burundi","Gitega","Gitega","AF","BI"],
+["Cabo Verde","Cape Verde","Praia","Praia","AF","CV"],["Camerún","Cameroon","Yaundé","Yaoundé","AF","CM"],
+["Chad","Chad","Yamena","N'Djamena","AF","TD"],["Comoras","Comoros","Moroni","Moroni","AF","KM"],
+["República del Congo","Republic of the Congo","Brazzaville","Brazzaville","AF","CG"],
+["República Democrática del Congo","Democratic Republic of the Congo","Kinshasa","Kinshasa","AF","CD"],
+["Costa de Marfil","Ivory Coast","Yamusukro","Yamoussoukro","AF","CI"],["Egipto","Egypt","El Cairo","Cairo","AF","EG"],
+["Eritrea","Eritrea","Asmara","Asmara","AF","ER"],["Esuatini","Eswatini","Mbabane","Mbabane","AF","SZ"],
+["Etiopía","Ethiopia","Adís Abeba","Addis Ababa","AF","ET"],["Gabón","Gabon","Libreville","Libreville","AF","GA"],
+["Gambia","Gambia","Banjul","Banjul","AF","GM"],["Ghana","Ghana","Acra","Accra","AF","GH"],
+["Guinea","Guinea","Conakry","Conakry","AF","GN"],["Guinea-Bisáu","Guinea-Bissau","Bisáu","Bissau","AF","GW"],
+["Guinea Ecuatorial","Equatorial Guinea","Malabo","Malabo","AF","GQ"],["Kenia","Kenya","Nairobi","Nairobi","AF","KE"],
+["Lesoto","Lesotho","Maseru","Maseru","AF","LS"],["Liberia","Liberia","Monrovia","Monrovia","AF","LR"],
+["Libia","Libya","Trípoli","Tripoli","AF","LY"],["Madagascar","Madagascar","Antananarivo","Antananarivo","AF","MG"],
+["Malaui","Malawi","Lilongüe","Lilongwe","AF","MW"],["Malí","Mali","Bamako","Bamako","AF","ML"],
+["Marruecos","Morocco","Rabat","Rabat","AF","MA"],["Mauricio","Mauritius","Port Louis","Port Louis","AF","MU"],
+["Mauritania","Mauritania","Nuakchot","Nouakchott","AF","MR"],["Mozambique","Mozambique","Maputo","Maputo","AF","MZ"],
+["Namibia","Namibia","Windhoek","Windhoek","AF","NA"],["Níger","Niger","Niamey","Niamey","AF","NE"],
+["Nigeria","Nigeria","Abuya","Abuja","AF","NG"],["República Centroafricana","Central African Republic","Bangui","Bangui","AF","CF"],
+["Ruanda","Rwanda","Kigali","Kigali","AF","RW"],["Santo Tomé y Príncipe","São Tomé and Príncipe","Santo Tomé","São Tomé","AF","ST"],
+["Senegal","Senegal","Dakar","Dakar","AF","SN"],["Seychelles","Seychelles","Victoria","Victoria","AF","SC"],
+["Sierra Leona","Sierra Leone","Freetown","Freetown","AF","SL"],["Somalia","Somalia","Mogadiscio","Mogadishu","AF","SO"],
+["Sudáfrica","South Africa","Pretoria","Pretoria","AF","ZA"],["Sudán","Sudan","Jartum","Khartoum","AF","SD"],
+["Sudán del Sur","South Sudan","Yuba","Juba","AF","SS"],["Tanzania","Tanzania","Dodoma","Dodoma","AF","TZ"],
+["Togo","Togo","Lomé","Lomé","AF","TG"],["Túnez","Tunisia","Túnez","Tunis","AF","TN"],
+["Uganda","Uganda","Kampala","Kampala","AF","UG"],["Yibuti","Djibouti","Yibuti","Djibouti","AF","DJ"],
+["Zambia","Zambia","Lusaka","Lusaka","AF","ZM"],["Zimbabue","Zimbabwe","Harare","Harare","AF","ZW"],
+
+["Afganistán","Afghanistan","Kabul","Kabul","AS","AF"],["Arabia Saudita","Saudi Arabia","Riad","Riyadh","AS","SA"],
+["Armenia","Armenia","Ereván","Yerevan","AS","AM"],["Azerbaiyán","Azerbaijan","Bakú","Baku","AS","AZ"],
+["Baréin","Bahrain","Manama","Manama","AS","BH"],["Bangladés","Bangladesh","Daca","Dhaka","AS","BD"],
+["Bután","Bhutan","Timbu","Thimphu","AS","BT"],["Brunéi","Brunei","Bandar Seri Begawan","Bandar Seri Begawan","AS","BN"],
+["Camboya","Cambodia","Nom Pen","Phnom Penh","AS","KH"],["Catar","Qatar","Doha","Doha","AS","QA"],
+["China","China","Pekín","Beijing","AS","CN"],["Chipre","Cyprus","Nicosia","Nicosia","AS","CY"],
+["Corea del Norte","North Korea","Pionyang","Pyongyang","AS","KP"],["Corea del Sur","South Korea","Seúl","Seoul","AS","KR"],
+["Emiratos Árabes Unidos","United Arab Emirates","Abu Dabi","Abu Dhabi","AS","AE"],["Filipinas","Philippines","Manila","Manila","AS","PH"],
+["Georgia","Georgia","Tiflis","Tbilisi","AS","GE"],["India","India","Nueva Delhi","New Delhi","AS","IN"],
+["Indonesia","Indonesia","Yakarta","Jakarta","AS","ID"],["Irak","Iraq","Bagdad","Baghdad","AS","IQ"],
+["Irán","Iran","Teherán","Tehran","AS","IR"],["Israel","Israel","Jerusalén","Jerusalem","AS","IL"],
+["Japón","Japan","Tokio","Tokyo","AS","JP"],["Jordania","Jordan","Amán","Amman","AS","JO"],
+["Kazajistán","Kazakhstan","Astaná","Astana","AS","KZ"],["Kirguistán","Kyrgyzstan","Biskek","Bishkek","AS","KG"],
+["Kuwait","Kuwait","Kuwait","Kuwait City","AS","KW"],["Laos","Laos","Vientián","Vientiane","AS","LA"],
+["Líbano","Lebanon","Beirut","Beirut","AS","LB"],["Malasia","Malaysia","Kuala Lumpur","Kuala Lumpur","AS","MY"],
+["Maldivas","Maldives","Malé","Malé","AS","MV"],["Mongolia","Mongolia","Ulán Bator","Ulaanbaatar","AS","MN"],
+["Birmania","Myanmar","Naipyidó","Naypyidaw","AS","MM"],["Nepal","Nepal","Katmandú","Kathmandu","AS","NP"],
+["Omán","Oman","Mascate","Muscat","AS","OM"],["Pakistán","Pakistan","Islamabad","Islamabad","AS","PK"],
+["Singapur","Singapore","Singapur","Singapore","AS","SG"],["Siria","Syria","Damasco","Damascus","AS","SY"],
+["Sri Lanka","Sri Lanka","Colombo","Colombo","AS","LK"],["Tailandia","Thailand","Bangkok","Bangkok","AS","TH"],
+["Tayikistán","Tajikistan","Dusambé","Dushanbe","AS","TJ"],["Timor Oriental","East Timor","Dili","Dili","AS","TL"],
+["Turkmenistán","Turkmenistan","Asjabad","Ashgabat","AS","TM"],["Turquía","Türkiye","Ankara","Ankara","AS","TR"],
+["Uzbekistán","Uzbekistan","Taskent","Tashkent","AS","UZ"],["Vietnam","Vietnam","Hanói","Hanoi","AS","VN"],
+["Yemen","Yemen","Saná","Sanaa","AS","YE"],
+
+["Albania","Albania","Tirana","Tirana","EU","AL"],["Alemania","Germany","Berlín","Berlin","EU","DE"],
+["Andorra","Andorra","Andorra la Vieja","Andorra la Vella","EU","AD"],["Austria","Austria","Viena","Vienna","EU","AT"],
+["Bélgica","Belgium","Bruselas","Brussels","EU","BE"],["Bielorrusia","Belarus","Minsk","Minsk","EU","BY"],
+["Bosnia y Herzegovina","Bosnia and Herzegovina","Sarajevo","Sarajevo","EU","BA"],["Bulgaria","Bulgaria","Sofía","Sofia","EU","BG"],
+["Chequia","Czechia","Praga","Prague","EU","CZ"],["Croacia","Croatia","Zagreb","Zagreb","EU","HR"],
+["Dinamarca","Denmark","Copenhague","Copenhagen","EU","DK"],["Eslovaquia","Slovakia","Bratislava","Bratislava","EU","SK"],
+["Eslovenia","Slovenia","Liubliana","Ljubljana","EU","SI"],["España","Spain","Madrid","Madrid","EU","ES"],
+["Estonia","Estonia","Tallin","Tallinn","EU","EE"],["Finlandia","Finland","Helsinki","Helsinki","EU","FI"],
+["Francia","France","París","Paris","EU","FR"],["Grecia","Greece","Atenas","Athens","EU","GR"],
+["Hungría","Hungary","Budapest","Budapest","EU","HU"],["Irlanda","Ireland","Dublín","Dublin","EU","IE"],
+["Islandia","Iceland","Reikiavik","Reykjavík","EU","IS"],["Italia","Italy","Roma","Rome","EU","IT"],
+["Letonia","Latvia","Riga","Riga","EU","LV"],["Liechtenstein","Liechtenstein","Vaduz","Vaduz","EU","LI"],
+["Lituania","Lithuania","Vilna","Vilnius","EU","LT"],["Luxemburgo","Luxembourg","Luxemburgo","Luxembourg","EU","LU"],
+["Macedonia del Norte","North Macedonia","Skopie","Skopje","EU","MK"],["Malta","Malta","La Valeta","Valletta","EU","MT"],
+["Moldavia","Moldova","Chisináu","Chișinău","EU","MD"],["Mónaco","Monaco","Mónaco","Monaco","EU","MC"],
+["Montenegro","Montenegro","Podgorica","Podgorica","EU","ME"],["Noruega","Norway","Oslo","Oslo","EU","NO"],
+["Países Bajos","Netherlands","Ámsterdam","Amsterdam","EU","NL"],["Polonia","Poland","Varsovia","Warsaw","EU","PL"],
+["Portugal","Portugal","Lisboa","Lisbon","EU","PT"],["Reino Unido","United Kingdom","Londres","London","EU","GB"],
+["Rumania","Romania","Bucarest","Bucharest","EU","RO"],["Rusia","Russia","Moscú","Moscow","EU","RU"],
+["San Marino","San Marino","San Marino","San Marino","EU","SM"],["Serbia","Serbia","Belgrado","Belgrade","EU","RS"],
+["Suecia","Sweden","Estocolmo","Stockholm","EU","SE"],["Suiza","Switzerland","Berna","Bern","EU","CH"],
+["Ucrania","Ukraine","Kiev","Kyiv","EU","UA"],
+
+["Antigua y Barbuda","Antigua and Barbuda","Saint John's","Saint John's","NA","AG"],["Bahamas","Bahamas","Nasáu","Nassau","NA","BS"],
+["Barbados","Barbados","Bridgetown","Bridgetown","NA","BB"],["Belice","Belize","Belmopán","Belmopan","NA","BZ"],
+["Canadá","Canada","Ottawa","Ottawa","NA","CA"],["Costa Rica","Costa Rica","San José","San José","NA","CR"],
+["Cuba","Cuba","La Habana","Havana","NA","CU"],["Dominica","Dominica","Roseau","Roseau","NA","DM"],
+["El Salvador","El Salvador","San Salvador","San Salvador","NA","SV"],["Estados Unidos","United States","Washington D. C.","Washington, D.C.","NA","US"],
+["Granada","Grenada","Saint George's","Saint George's","NA","GD"],["Guatemala","Guatemala","Ciudad de Guatemala","Guatemala City","NA","GT"],
+["Haití","Haiti","Puerto Príncipe","Port-au-Prince","NA","HT"],["Honduras","Honduras","Tegucigalpa","Tegucigalpa","NA","HN"],
+["Jamaica","Jamaica","Kingston","Kingston","NA","JM"],["México","Mexico","Ciudad de México","Mexico City","NA","MX"],
+["Nicaragua","Nicaragua","Managua","Managua","NA","NI"],["Panamá","Panama","Ciudad de Panamá","Panama City","NA","PA"],
+["República Dominicana","Dominican Republic","Santo Domingo","Santo Domingo","NA","DO"],
+["San Cristóbal y Nieves","Saint Kitts and Nevis","Basseterre","Basseterre","NA","KN"],
+["San Vicente y las Granadinas","Saint Vincent and the Grenadines","Kingstown","Kingstown","NA","VC"],
+["Santa Lucía","Saint Lucia","Castries","Castries","NA","LC"],["Trinidad y Tobago","Trinidad and Tobago","Puerto España","Port of Spain","NA","TT"],
+
+["Argentina","Argentina","Buenos Aires","Buenos Aires","SA","AR"],["Bolivia","Bolivia","Sucre","Sucre","SA","BO"],
+["Brasil","Brazil","Brasilia","Brasília","SA","BR"],["Chile","Chile","Santiago","Santiago","SA","CL"],
+["Colombia","Colombia","Bogotá","Bogotá","SA","CO"],["Ecuador","Ecuador","Quito","Quito","SA","EC"],
+["Guyana","Guyana","Georgetown","Georgetown","SA","GY"],["Paraguay","Paraguay","Asunción","Asunción","SA","PY"],
+["Perú","Peru","Lima","Lima","SA","PE"],["Surinam","Suriname","Paramaribo","Paramaribo","SA","SR"],
+["Uruguay","Uruguay","Montevideo","Montevideo","SA","UY"],["Venezuela","Venezuela","Caracas","Caracas","SA","VE"],
+
+["Australia","Australia","Canberra","Canberra","OC","AU"],["Fiyi","Fiji","Suva","Suva","OC","FJ"],
+["Kiribati","Kiribati","Tarawa Sur","South Tarawa","OC","KI"],["Islas Marshall","Marshall Islands","Majuro","Majuro","OC","MH"],
+["Micronesia","Micronesia","Palikir","Palikir","OC","FM"],["Nauru","Nauru","Yaren","Yaren","OC","NR"],
+["Nueva Zelanda","New Zealand","Wellington","Wellington","OC","NZ"],["Palaos","Palau","Ngerulmud","Ngerulmud","OC","PW"],
+["Papúa Nueva Guinea","Papua New Guinea","Port Moresby","Port Moresby","OC","PG"],["Samoa","Samoa","Apia","Apia","OC","WS"],
+["Islas Salomón","Solomon Islands","Honiara","Honiara","OC","SB"],["Tonga","Tonga","Nukualofa","Nukuʻalofa","OC","TO"],
+["Tuvalu","Tuvalu","Funafuti","Funafuti","OC","TV"],["Vanuatu","Vanuatu","Port Vila","Port Vila","OC","VU"]
+];
+
+/* =========================================================
+   FACTS — [popMillones, monedaES, monedaEN, idiomaES, idiomaEN,
+             datoES, datoEN, datoCapitalES, datoCapitalEN]
+   ========================================================= */
+const FACTS = {
+DZ:[46,"Dinar argelino (DZD)","Algerian dinar (DZD)","Árabe y tamazight","Arabic & Tamazight","El país más extenso de África","Largest country in Africa","Principal puerto del Magreb","Main port of the Maghreb"],
+AO:[36,"Kwanza (AOA)","Kwanza (AOA)","Portugués","Portuguese","Mayor productor de petróleo del África subsahariana","Top oil producer in sub-Saharan Africa","Una de las ciudades más caras del mundo","One of the world's priciest cities"],
+BJ:[13,"Franco CFA (XOF)","CFA franc (XOF)","Francés y fon","French & Fon","Cuna del vudú","Birthplace of voodoo","Capital oficial; Cotonú alberga el gobierno","Official capital; Cotonou hosts the government"],
+BW:[2.6,"Pula (BWP)","Pula (BWP)","Setsuana e inglés","Tswana & English","Mayor productor mundial de diamantes por valor","World's top diamond producer by value","Creció tras el hallazgo de diamantes","Boomed after diamonds were found"],
+BF:[22,"Franco CFA (XOF)","CFA franc (XOF)","Francés y mossi","French & Mossi","Sede del FESPACO, el mayor festival de cine de África","Home of FESPACO, Africa's biggest film festival","Capital del cine africano","Capital of African cinema"],
+BI:[12,"Franco burundés (BIF)","Burundian franc (BIF)","Kirundi y francés","Kirundi & French","Uno de los países más pobres del mundo","One of the world's poorest countries","Nueva capital desde 2019","Capital since 2019"],
+CV:[0.6,"Escudo caboverdiano (CVE)","Cape Verdean escudo (CVE)","Portugués y criollo","Portuguese & Creole","Archipiélago volcánico frente a Senegal","Volcanic archipelago off Senegal","Puerto principal del archipiélago","Main port of the archipelago"],
+CM:[28,"Franco CFA (XAF)","CFA franc (XAF)","Francés e inglés","French & English","Conocido como los 'Leones Indomables' del fútbol","Known as football's 'Indomitable Lions'","Capital política; Douala es la económica","Political capital; Douala is the economic hub"],
+TD:[18,"Franco CFA (XAF)","CFA franc (XAF)","Árabe y francés","Arabic & French","Alberga el lago Chad, que se encoge cada año","Home to Lake Chad, shrinking every year","Fundada por los franceses en 1900","Founded by the French in 1900"],
+KM:[0.8,"Franco comorense (KMF)","Comorian franc (KMF)","Comorense, árabe y francés","Comorian, Arabic & French","Mayor productor mundial de ylang-ylang","World's top ylang-ylang producer","Puerto principal, en Gran Comora","Main port, on Grande Comore"],
+CG:[6,"Franco CFA (XAF)","CFA franc (XAF)","Francés y kituba","French & Kituba","Rico en petróleo y madera","Rich in oil and timber","La capital más cercana del mundo a otra","The world's closest capital to another"],
+CD:[102,"Franco congoleño (CDF)","Congolese franc (CDF)","Francés, lingala y suajili","French, Lingala & Swahili","Segundo país más grande de África","Africa's second-largest country","Mayor ciudad francófona del mundo","World's largest French-speaking city"],
+CI:[28,"Franco CFA (XOF)","CFA franc (XOF)","Francés y dyula","French & Dyula","Primer productor mundial de cacao","World's top cocoa producer","Tiene la basílica más grande del mundo","Has the world's largest basilica"],
+EG:[105,"Libra egipcia (EGP)","Egyptian pound (EGP)","Árabe","Arabic","Única maravilla antigua en pie: las pirámides de Guiza","Only surviving ancient wonder: the Giza pyramids","Mayor ciudad del mundo árabe","Largest city in the Arab world"],
+ER:[3.5,"Nakfa (ERN)","Nakfa (ERN)","Tigriña, árabe e inglés","Tigrinya, Arabic & English","Su capital es Patrimonio de la UNESCO por su arte déco","Its capital is a UNESCO site for Art Deco","Ciudad de arquitectura modernista italiana","Italian modernist architecture"],
+SZ:[1.2,"Lilangeni (SZL)","Lilangeni (SZL)","Suazi e inglés","Swazi & English","Una de las últimas monarquías absolutas de África","One of Africa's last absolute monarchies","Capital administrativa; Lobamba es la real","Administrative capital; Lobamba is the royal one"],
+ET:[126,"Birr (ETB)","Birr (ETB)","Amárico y oromo","Amharic & Oromo","Nunca fue colonizado y es la cuna del café","Never colonized and the birthplace of coffee","Sede de la Unión Africana","Home of the African Union"],
+GA:[2.4,"Franco CFA (XAF)","CFA franc (XAF)","Francés y fang","French & Fang","Gran productor mundial de manganeso","A top global manganese producer","Fundada por esclavos liberados","Founded by freed slaves"],
+GM:[2.7,"Dalasi (GMD)","Dalasi (GMD)","Inglés y mandinga","English & Mandinka","El país más pequeño del África continental","Smallest country on mainland Africa","Situada en una isla del río Gambia","On an island in the Gambia River"],
+GH:[33,"Cedi (GHS)","Cedi (GHS)","Inglés y twi","English & Twi","Primer país africano en independizarse (1957)","First African country to gain independence (1957)","Capital con playas y fuertes coloniales","Coastal capital with colonial forts"],
+GN:[14,"Franco guineano (GNF)","Guinean franc (GNF)","Francés y fulani","French & Fula","Tiene las mayores reservas de bauxita del mundo","Holds the world's largest bauxite reserves","Puerto principal en una península","Main port on a peninsula"],
+GW:[2.1,"Franco CFA (XOF)","CFA franc (XOF)","Portugués y criollo","Portuguese & Creole","El anacardo es su principal exportación","Cashew nuts are its main export","Antiguo centro del imperio portugués","Former hub of Portuguese Africa"],
+GQ:[1.7,"Franco CFA (XAF)","CFA franc (XAF)","Español, francés y portugués","Spanish, French & Portuguese","Único país hispanohablante de África","Africa's only Spanish-speaking country","Capital en la isla de Bioko","Capital on Bioko Island"],
+KE:[55,"Chelín keniano (KES)","Kenyan shilling (KES)","Suajili e inglés","Swahili & English","Famoso por sus safaris y el Valle del Rift","Famous for safaris and the Rift Valley","Única capital con un parque nacional dentro","Only capital with a national park inside"],
+LS:[2.3,"Loti (LSL)","Loti (LSL)","Sesoto e inglés","Sesotho & English","Todo su territorio supera los 1.000 m de altitud","Entirely above 1,000 m elevation","La única ciudad grande del país","The country's only large city"],
+LR:[5.4,"Dólar liberiano (LRD)","Liberian dollar (LRD)","Inglés","English","Fundado por esclavos liberados de EE. UU.","Founded by freed American slaves","Nombrada en honor al presidente Monroe","Named after President Monroe"],
+LY:[7,"Dinar libio (LYD)","Libyan dinar (LYD)","Árabe","Arabic","Tiene las mayores reservas de petróleo de África","Holds Africa's largest oil reserves","Fundada por los fenicios","Founded by the Phoenicians"],
+MG:[30,"Ariary (MGA)","Ariary (MGA)","Malgache y francés","Malagasy & French","Cuarta isla más grande del mundo","The world's fourth-largest island","Construida sobre una serie de colinas","Built across a series of hills"],
+MW:[21,"Kwacha malauí (MWK)","Malawian kwacha (MWK)","Chichewa e inglés","Chichewa & English","Su lago tiene más especies de peces que ningún otro","Its lake has more fish species than any other","Capital desde 1975, sustituyó a Zomba","Capital since 1975, replacing Zomba"],
+ML:[23,"Franco CFA (XOF)","CFA franc (XOF)","Francés y bambara","French & Bambara","Cuna del imperio de Malí y de Tombuctú","Home of the Mali Empire and Timbuktu","A orillas del río Níger","On the Niger River"],
+MA:[37,"Dírham marroquí (MAD)","Moroccan dirham (MAD)","Árabe y bereber","Arabic & Berber","Mayor exportador mundial de fosfatos","World's top phosphate exporter","Capital; Casablanca es la mayor ciudad","Capital; Casablanca is the largest city"],
+MU:[1.3,"Rupia mauriciana (MUR)","Mauritian rupee (MUR)","Inglés y criollo","English & Creole","Fue el hogar del dodo, extinguido en el siglo XVII","Home of the dodo, extinct in the 1600s","Tiene el hipódromo más antiguo del hemisferio sur","Has the Southern Hemisphere's oldest racetrack"],
+MR:[5,"Uguiya (MRU)","Ouguiya (MRU)","Árabe","Arabic","Opera uno de los trenes más largos del mundo","Runs one of the world's longest trains","Una de las capitales más nuevas del mundo","One of the world's newest capitals"],
+MZ:[33,"Metical (MZN)","Metical (MZN)","Portugués","Portuguese","Único país con un rifle en su bandera","The only country with an AK-47 on its flag","Conocida por su arquitectura art déco","Known for its Art Deco architecture"],
+NA:[2.6,"Dólar namibio (NAD)","Namibian dollar (NAD)","Inglés y oshivambo","English & Oshiwambo","Tiene el desierto más antiguo del mundo, el Namib","Home to the Namib, the world's oldest desert","Capital a 1.700 m de altitud","Capital at 1,700 m elevation"],
+NE:[27,"Franco CFA (XOF)","CFA franc (XOF)","Francés y hausa","French & Hausa","Alberga las últimas jirafas salvajes de África occidental","Home to West Africa's last wild giraffes","A orillas del río Níger","On the Niger River"],
+NG:[223,"Naira (NGN)","Naira (NGN)","Inglés, hausa, yoruba, igbo","English, Hausa, Yoruba, Igbo","La mayor economía de África","Africa's largest economy","Capital planificada desde 1991","Purpose-built capital since 1991"],
+CF:[5,"Franco CFA (XAF)","CFA franc (XAF)","Francés y sango","French & Sango","Uno de los países más ricos en diamantes por km²","Among the most diamond-rich per km²","A orillas del río Ubangi","On the Ubangi River"],
+RW:[14,"Franco ruandés (RWF)","Rwandan franc (RWF)","Kinyarwanda, francés e inglés","Kinyarwanda, French & English","Prohibió las bolsas de plástico y es famoso por su limpieza","Banned plastic bags and is famed for cleanliness","Una de las capitales más limpias del mundo","One of the world's cleanest capitals"],
+ST:[0.2,"Dobra (STN)","Dobra (STN)","Portugués","Portuguese","Produce cacao de alta calidad","Produces premium cacao","Capital en una isla volcánica","Capital on a volcanic island"],
+SN:[18,"Franco CFA (XOF)","CFA franc (XOF)","Francés y wólof","French & Wolof","Punto más occidental del África continental","Westernmost point of mainland Africa","Final del rally París-Dakar","Finish of the Paris-Dakar rally"],
+SC:[0.1,"Rupia seychellense (SCR)","Seychellois rupee (SCR)","Criollo, inglés y francés","Creole, English & French","El país más rico de África por PIB per cápita","Africa's richest country by GDP per capita","Una de las capitales más pequeñas del mundo","One of the world's smallest capitals"],
+SL:[8,"Leone (SLE)","Leone (SLE)","Inglés y krio","English & Krio","Tiene uno de los puertos naturales más grandes del mundo","Has one of the world's largest natural harbours","Fundada por esclavos liberados","Founded by freed slaves"],
+SO:[18,"Chelín somalí (SOS)","Somali shilling (SOS)","Somalí y árabe","Somali & Arabic","La costa más larga del África continental","Longest coastline in mainland Africa","Antiguo centro comercial del Índico","Historic Indian Ocean trading hub"],
+ZA:[60,"Rand (ZAR)","Rand (ZAR)","11 idiomas oficiales","11 official languages","Tiene tres capitales y 11 idiomas oficiales","Has three capitals and 11 official languages","Capital administrativa del país","The country's administrative capital"],
+SD:[46,"Libra sudanesa (SDG)","Sudanese pound (SDG)","Árabe e inglés","Arabic & English","Tiene más pirámides que Egipto","Has more pyramids than Egypt","Donde se unen el Nilo Azul y el Blanco","Where the Blue and White Nile meet"],
+SS:[11,"Libra sursudanesa (SSP)","South Sudanese pound (SSP)","Inglés","English","El país más joven del mundo (2011)","The world's youngest country (2011)","A orillas del Nilo Blanco","On the White Nile"],
+TZ:[65,"Chelín tanzano (TZS)","Tanzanian shilling (TZS)","Suajili e inglés","Swahili & English","Alberga el Kilimanjaro, el techo de África","Home to Kilimanjaro, Africa's highest peak","Capital desde 1996, sustituyó a Dar es Salaam","Capital since 1996, replacing Dar es Salaam"],
+TG:[9,"Franco CFA (XOF)","CFA franc (XOF)","Francés y ewé","French & Ewe","Uno de los países más estrechos del mundo","One of the world's narrowest countries","Única capital africana junto a una playa y una frontera","Only African capital on a beach and a border"],
+TN:[12,"Dinar tunecino (TND)","Tunisian dinar (TND)","Árabe","Arabic","Cuna de la Primavera Árabe (2011)","Birthplace of the Arab Spring (2011)","Cerca de las ruinas de Cartago","Near the ruins of Carthage"],
+UG:[47,"Chelín ugandés (UGX)","Ugandan shilling (UGX)","Inglés y suajili","English & Swahili","En el nacimiento del río Nilo","At the source of the Nile River","Construida sobre siete colinas","Built on seven hills"],
+DJ:[1.1,"Franco yibutiano (DJF)","Djiboutian franc (DJF)","Árabe y francés","Arabic & French","Puerta del mar Rojo y base militar estratégica","Gateway to the Red Sea and key military base","Punto de salida del mar Rojo","The Red Sea's outlet"],
+ZM:[20,"Kwacha zambiano (ZMW)","Zambian kwacha (ZMW)","Inglés y bemba","English & Bemba","Comparte las cataratas Victoria con Zimbabue","Shares Victoria Falls with Zimbabwe","Capital de rápido crecimiento","One of Africa's fastest-growing capitals"],
+ZW:[16,"Dólar zimbabuense (ZWL)","Zimbabwean dollar (ZWL)","Inglés y shona","English & Shona","Hogar de las cataratas Victoria","Home of Victoria Falls","Antigua Salisbury","Formerly called Salisbury"],
+
+AF:[41,"Afgani (AFN)","Afghan afghani (AFN)","Pastún y dari","Pashto & Dari","Produce cerca del 90% del opio mundial","Produces about 90% of the world's opium","Capital a 1.800 m de altitud","Capital at 1,800 m elevation"],
+SA:[36,"Riyal saudí (SAR)","Saudi riyal (SAR)","Árabe","Arabic","Mayor exportador de petróleo del mundo","The world's largest oil exporter","Capital que creció con el petróleo","A capital that boomed with oil"],
+AM:[3,"Dram (AMD)","Dram (AMD)","Armenio","Armenian","Primer país en adoptar el cristianismo (301)","First country to adopt Christianity (301)","Una de las ciudades más antiguas habitadas","One of the world's oldest inhabited cities"],
+AZ:[10,"Manat azerbaiyano (AZN)","Azerbaijani manat (AZN)","Azerí","Azerbaijani","Tiene más volcanes de lodo que ningún otro país","Home to more mud volcanoes than anywhere else","La capital más baja del mundo, a -28 m","World's lowest-lying capital, at -28 m"],
+BH:[1.5,"Dinar bareiní (BHD)","Bahraini dinar (BHD)","Árabe","Arabic","Sede de la primera refinería de petróleo del Golfo","Site of the Gulf's first oil refinery","Tiene un antiguo fuerte portugués","Home to an old Portuguese fort"],
+BD:[170,"Taka (BDT)","Taka (BDT)","Bengalí","Bengali","Tiene la playa más larga del mundo","Has the world's longest natural beach","Una de las ciudades más densas del mundo","One of the world's densest cities"],
+BT:[0.8,"Ngultrum (BTN)","Ngultrum (BTN)","Dzongkha","Dzongkha","Mide la Felicidad Nacional Bruta","Measures Gross National Happiness","La única capital sin semáforos","The only capital with no traffic lights"],
+BN:[0.5,"Dólar de Brunéi (BND)","Brunei dollar (BND)","Malayo","Malay","Su sultán es uno de los hombres más ricos del mundo","Its sultan is one of the world's richest men","Tiene el palacio más grande del mundo","Has the world's largest palace"],
+KH:[17,"Riel (KHR)","Riel (KHR)","Jemer","Khmer","Hogar de Angkor Wat, el mayor templo del mundo","Home to Angkor Wat, the largest temple on Earth","Capital a orillas del Mekong","Capital on the Mekong River"],
+QA:[3,"Riyal catarí (QAR)","Qatari riyal (QAR)","Árabe","Arabic","El mayor PIB per cápita del mundo","The world's highest GDP per capita","Sede del Mundial de Fútbol 2022","Hosted the 2022 FIFA World Cup"],
+CN:[1410,"Yuan (CNY)","Yuan (CNY)","Chino mandarín","Mandarin Chinese","Segunda economía mundial y mayor exportador","Second-largest economy and top exporter","Hogar de la Ciudad Prohibida","Home of the Forbidden City"],
+CY:[1.2,"Euro (EUR)","Euro (EUR)","Griego y turco","Greek & Turkish","Isla dividida en dos desde 1974","An island divided in two since 1974","La última capital dividida del mundo","The world's last divided capital"],
+KP:[26,"Won norcoreano (KPW)","North Korean won (KPW)","Coreano","Korean","Uno de los países más militarizados del mundo","One of the world's most militarized countries","Tiene el estadio más grande del mundo","Home to the world's largest stadium"],
+KR:[52,"Won surcoreano (KRW)","South Korean won (KRW)","Coreano","Korean","Líder mundial en semiconductores y tecnología","A world leader in semiconductors","Una de las ciudades más conectadas del mundo","One of the world's most wired cities"],
+AE:[9.5,"Dírham (AED)","Dirham (AED)","Árabe","Arabic","Tiene el edificio más alto del mundo, el Burj Khalifa","Home to the Burj Khalifa, the tallest building","Capital federal de los siete emiratos","Federal capital of the seven emirates"],
+PH:[115,"Peso filipino (PHP)","Philippine peso (PHP)","Filipino e inglés","Filipino & English","El segundo archipiélago más grande del mundo","The world's second-largest archipelago","Una de las ciudades más densas del planeta","One of the most densely populated cities"],
+GE:[3.7,"Lari (GEL)","Lari (GEL)","Georgiano","Georgian","Cuna del vino, con 8.000 años de historia","Birthplace of wine, with 8,000 years of it","Famosa por sus baños de azufre","Famous for its sulphur baths"],
+IN:[1430,"Rupia india (INR)","Indian rupee (INR)","Hindi e inglés","Hindi & English","El país más poblado del mundo","The world's most populous country","Hogar del Templo del Loto","Home of the Lotus Temple"],
+ID:[277,"Rupia indonesia (IDR)","Indonesian rupiah (IDR)","Indonesio","Indonesian","El archipiélago más grande del mundo","The world's largest archipelago","Se hunde; la capital se muda a Nusantara","Sinking city; capital moving to Nusantara"],
+IQ:[45,"Dinar iraquí (IQD)","Iraqi dinar (IQD)","Árabe y kurdo","Arabic & Kurdish","Cuna de Mesopotamia, la primera civilización","Cradle of Mesopotamia, the first civilization","Capital de los califas abasíes","Capital of the Abbasid caliphs"],
+IR:[89,"Rial iraní (IRR)","Iranian rial (IRR)","Persa","Persian","Heredera del imperio persa","Heir to the Persian Empire","A los pies del volcán Damavand","Beneath Mount Damavand"],
+IL:[9.8,"Séquel (ILS)","Shekel (ILS)","Hebreo y árabe","Hebrew & Arabic","Tiene más startups per cápita que ningún país","Has the most startups per capita","Ciudad sagrada para tres religiones","A holy city for three religions"],
+JP:[124,"Yen (JPY)","Yen (JPY)","Japonés","Japanese","Tercera economía del mundo y cuna del anime","Third-largest economy and home of anime","El área metropolitana más poblada del mundo","The world's most populous metro area"],
+JO:[11,"Dinar jordano (JOD)","Jordanian dinar (JOD)","Árabe","Arabic","Alberga Petra, una de las nuevas maravillas","Home to Petra, one of the New Seven Wonders","Una de las ciudades más antiguas habitadas","One of the oldest inhabited cities"],
+KZ:[20,"Tenge (KZT)","Tenge (KZT)","Kazajo y ruso","Kazakh & Russian","El país sin litoral más grande del mundo","The world's largest landlocked country","La segunda capital más fría del mundo","The world's second-coldest capital"],
+KG:[7,"Som (KGS)","Som (KGS)","Kirguís y ruso","Kyrgyz & Russian","Más del 90% del país es montañoso","Over 90% of the country is mountainous","Rodeada de las montañas Tian Shan","Surrounded by the Tian Shan mountains"],
+KW:[4.3,"Dinar kuwaití (KWD)","Kuwaiti dinar (KWD)","Árabe","Arabic","Su moneda es la más valiosa del mundo","Its currency is the world's most valuable","Reconstruida tras la guerra del Golfo","Rebuilt after the Gulf War"],
+LA:[7.6,"Kip (LAK)","Kip (LAK)","Lao","Lao","El país más bombardeado de la historia","The most bombed country in history","Capital tranquila a orillas del Mekong","A sleepy capital on the Mekong"],
+LB:[5.5,"Libra libanesa (LBP)","Lebanese pound (LBP)","Árabe y francés","Arabic & French","Famoso por sus cedros milenarios","Famous for its ancient cedars","Reconstruida muchas veces; 'París de Oriente'","Rebuilt many times; the 'Paris of the East'"],
+MY:[34,"Ringgit (MYR)","Ringgit (MYR)","Malayo","Malay","Tiene las torres gemelas más altas del mundo","Home to the world's tallest twin towers","Hogar de las Torres Petronas","Home of the Petronas Towers"],
+MV:[0.5,"Rufiyaa (MVR)","Rufiyaa (MVR)","Dhivehi","Dhivehi","El país más plano del mundo","The flattest country in the world","Una de las capitales más densas del mundo","One of the world's densest capitals"],
+MN:[3.4,"Tugrik (MNT)","Tugrik (MNT)","Mongol","Mongolian","El país con menor densidad de población","The least densely populated country","La capital más fría del mundo","The world's coldest capital"],
+MM:[54,"Kyat (MMK)","Kyat (MMK)","Birmano","Burmese","Tiene más pagodas que cualquier otro país","Has more pagodas than any other country","Capital construida de la nada en 2005","Built from scratch in 2005"],
+NP:[30,"Rupia nepalí (NPR)","Nepalese rupee (NPR)","Nepalí","Nepali","Hogar del Everest, el pico más alto del mundo","Home to Everest, the world's highest peak","Siete sitios Patrimonio de la UNESCO","Has seven UNESCO World Heritage sites"],
+OM:[4.6,"Rial omaní (OMR)","Omani rial (OMR)","Árabe","Arabic","El productor de incienso más famoso del mundo","The world's most famous frankincense producer","Antiguo puerto de la Ruta del Incienso","Historic port on the incense route"],
+PK:[240,"Rupia pakistaní (PKR)","Pakistani rupee (PKR)","Urdu e inglés","Urdu & English","Tiene el mayor sistema de riego del mundo","Has the world's largest irrigation system","Capital planificada en los años 60","A planned capital from the 1960s"],
+SG:[6,"Dólar singapurense (SGD)","Singapore dollar (SGD)","Inglés, malayo, chino y tamil","English, Malay, Chinese & Tamil","Uno de los puertos más activos del mundo","One of the world's busiest ports","Ciudad-estado que es su propia capital","A city-state that is its own capital"],
+SY:[22,"Libra siria (SYP)","Syrian pound (SYP)","Árabe","Arabic","Damasco es una de las ciudades más antiguas del mundo","Damascus is one of the world's oldest cities","Habitada desde hace más de 11.000 años","Inhabited for over 11,000 years"],
+LK:[22,"Rupia de Sri Lanka (LKR)","Sri Lankan rupee (LKR)","Cingalés y tamil","Sinhala & Tamil","Famosa en todo el mundo por su té de Ceilán","World-famous for its Ceylon tea","Capital comercial; la oficial es Sri Jayawardenepura","Commercial capital; the official one is Sri Jayawardenepura"],
+TH:[72,"Baht (THB)","Baht (THB)","Tailandés","Thai","Único país del sudeste asiático nunca colonizado","The only Southeast Asian country never colonized","Su nombre completo tiene 168 letras","Its full name has 168 letters"],
+TJ:[10,"Somoni (TJS)","Somoni (TJS)","Tayiko","Tajik","Tiene la presa más alta del mundo","Home to the world's tallest dam","Su nombre significa 'lunes'","Its name means 'Monday'"],
+TL:[1.4,"Dólar estadounidense (USD)","US dollar (USD)","Tetun y portugués","Tetum & Portuguese","Primer país nuevo del siglo XXI (2002)","The first new country of the 21st century (2002)","Capital en la isla de Timor","Capital on Timor island"],
+TM:[6.5,"Manat turcomano (TMT)","Turkmen manat (TMT)","Turcomano","Turkmen","Tiene el cráter de gas 'Puerta del Infierno'","Home to the 'Door to Hell' gas crater","La ciudad con más mármol blanco del mundo","The city with the most white marble"],
+TR:[85,"Lira turca (TRY)","Turkish lira (TRY)","Turco","Turkish","Estambul es la única ciudad en dos continentes","Istanbul is the only city on two continents","Capital desde 1923, sustituyó a Estambul","Capital since 1923, replacing Istanbul"],
+UZ:[36,"Som uzbeko (UZS)","Uzbek som (UZS)","Uzbeko","Uzbek","Uno de los dos países doblemente sin litoral","One of only two doubly landlocked countries","La mayor ciudad de Asia Central","The largest city in Central Asia"],
+VN:[99,"Đồng (VND)","Đồng (VND)","Vietnamita","Vietnamese","Segundo exportador de café del mundo","The world's second-largest coffee exporter","Hogar de la Ciudadela Imperial de Thang Long","Home of the Thang Long Imperial Citadel"],
+YE:[34,"Rial yemení (YER)","Yemeni rial (YER)","Árabe","Arabic","Hogar de Socotra, una isla única en el mundo","Home to Socotra, an island like no other","Ciudad Patrimonio de la Humanidad","A UNESCO World Heritage city"],
+
+AL:[2.8,"Lek (ALL)","Lek (ALL)","Albanés","Albanian","Tiene más de 170.000 búnkeres repartidos","Has over 170,000 bunkers scattered around","Famosa por sus edificios de colores","Famous for its brightly painted buildings"],
+DE:[84,"Euro (EUR)","Euro (EUR)","Alemán","German","La mayor economía de Europa","Europe's largest economy","Tiene más puentes que Venecia","Has more bridges than Venice"],
+AD:[0.08,"Euro (EUR)","Euro (EUR)","Catalán","Catalan","El país más visitado del mundo per cápita","The most visited country per capita","La capital más alta de Europa, a 1.023 m","Europe's highest capital, at 1,023 m"],
+AT:[9,"Euro (EUR)","Euro (EUR)","Alemán","German","Cuna de Mozart, Beethoven y Freud","Home of Mozart, Beethoven and Freud","Ciudad con mejor calidad de vida del mundo","Repeatedly the world's most liveable city"],
+BE:[11.7,"Euro (EUR)","Euro (EUR)","Neerlandés, francés y alemán","Dutch, French & German","Famosa por su chocolate y sus cómics","Famous for chocolate and comic books","Capital de facto de la Unión Europea","De facto capital of the European Union"],
+BY:[9.3,"Rublo bielorruso (BYN)","Belarusian ruble (BYN)","Bielorruso y ruso","Belarusian & Russian","Conserva los últimos bosques primigenios de Europa","Preserves Europe's last primeval forests","Reconstruida tras la II Guerra Mundial","Rebuilt after World War II"],
+BA:[3.2,"Marco convertible (BAM)","Convertible mark (BAM)","Bosnio, croata y serbio","Bosnian, Croatian & Serbian","Famosa por el puente Stari Most de Mostar","Famous for the Stari Most bridge in Mostar","Donde empezó la I Guerra Mundial","Where World War I began"],
+BG:[6.5,"Lev (BGN)","Lev (BGN)","Búlgaro","Bulgarian","Produce el 70% del aceite de rosa del mundo","Produces 70% of the world's rose oil","Una de las capitales más antiguas de Europa","One of Europe's oldest capitals"],
+CZ:[10.5,"Corona checa (CZK)","Czech koruna (CZK)","Checo","Czech","Los checos beben más cerveza per cápita del mundo","Czechs drink the most beer per capita","Tiene el castillo más grande del mundo","Has the world's largest castle complex"],
+HR:[3.8,"Euro (EUR)","Euro (EUR)","Croata","Croatian","Inventó la corbata","Invented the necktie","Hogar del Museo de las Relaciones Rotas","Home of the Museum of Broken Relationships"],
+DK:[6,"Corona danesa (DKK)","Danish krone (DKK)","Danés","Danish","Cuna de Lego y de Hans Christian Andersen","Home of Lego and Hans Christian Andersen","Famosa por sus bicicletas","Famous for its cycling culture"],
+SK:[5.4,"Euro (EUR)","Euro (EUR)","Eslovaco","Slovak","El país con más castillos per cápita","Has the most castles per capita","La única capital que limita con dos países","The only capital bordering two countries"],
+SI:[2.1,"Euro (EUR)","Euro (EUR)","Esloveno","Slovenian","Más del 60% del país es bosque","Over 60% of the country is forest","Su símbolo es un dragón","Its symbol is a dragon"],
+ES:[48,"Euro (EUR)","Euro (EUR)","Español","Spanish","El segundo país más visitado del mundo","The world's second most visited country","Hogar del museo del Prado","Home of the Prado Museum"],
+EE:[1.3,"Euro (EUR)","Euro (EUR)","Estonio","Estonian","El país más digitalizado de Europa","Europe's most digital country","Casco medieval perfectamente conservado","Has a perfectly preserved medieval old town"],
+FI:[5.5,"Euro (EUR)","Euro (EUR)","Finés y sueco","Finnish & Swedish","El país más feliz del mundo año tras año","The world's happiest country year after year","Hogar de la fortaleza de Suomenlinna","Home to the Suomenlinna fortress"],
+FR:[68,"Euro (EUR)","Euro (EUR)","Francés","French","El país más visitado del mundo","The world's most visited country","Hogar de la torre Eiffel","Home of the Eiffel Tower"],
+GR:[10.4,"Euro (EUR)","Euro (EUR)","Griego","Greek","Cuna de la democracia y los Juegos Olímpicos","Birthplace of democracy and the Olympics","Una de las ciudades habitadas más antiguas","One of the oldest inhabited cities"],
+HU:[9.6,"Forinto (HUF)","Forint (HUF)","Húngaro","Hungarian","Inventó el cubo de Rubik y el bolígrafo","Invented the Rubik's Cube and the ballpoint pen","Tiene los baños termales más grandes de Europa","Has Europe's largest thermal bath complex"],
+IE:[5.2,"Euro (EUR)","Euro (EUR)","Irlandés e inglés","Irish & English","Conocida como 'la isla esmeralda'","Known as the Emerald Isle","Cuna de Guinness y de James Joyce","Home of Guinness and James Joyce"],
+IS:[0.4,"Corona islandesa (ISK)","Icelandic króna (ISK)","Islandés","Icelandic","El país más pacífico del mundo durante años","Ranked the world's most peaceful country for years","La capital más septentrional del mundo","The world's northernmost capital"],
+IT:[59,"Euro (EUR)","Euro (EUR)","Italiano","Italian","Tiene más sitios UNESCO que ningún otro país","Has more UNESCO sites than any other country","Hogar del Coliseo y el Vaticano","Home of the Colosseum and the Vatican"],
+LV:[1.9,"Euro (EUR)","Euro (EUR)","Letón","Latvian","Tiene la cascada más ancha de Europa","Has Europe's widest waterfall","La mayor colección de arte modernista del mundo","The world's finest Art Nouveau collection"],
+LI:[0.04,"Franco suizo (CHF)","Swiss franc (CHF)","Alemán","German","Uno de los dos países doblemente sin litoral","One of only two doubly landlocked countries","Una capital sin aeropuerto propio","A capital with no airport of its own"],
+LT:[2.8,"Euro (EUR)","Euro (EUR)","Lituano","Lithuanian","Primera república soviética en independizarse","The first Soviet republic to declare independence","Tiene una 'república' de artistas","Home to the artists' 'Republic of Užupis'"],
+LU:[0.66,"Euro (EUR)","Euro (EUR)","Luxemburgués, francés y alemán","Luxembourgish, French & German","Primer país con transporte público gratuito","First country with free public transport","Sede del Tribunal de Justicia de la UE","Home of the EU Court of Justice"],
+MK:[2,"Denar (MKD)","Denar (MKD)","Macedonio y albanés","Macedonian & Albanian","Tiene el lago más antiguo de Europa","Home to Europe's oldest lake","La ciudad con más estatuas per cápita","The city with the most statues per capita"],
+MT:[0.5,"Euro (EUR)","Euro (EUR)","Maltés e inglés","Maltese & English","Tiene los templos más antiguos del mundo","Has the world's oldest free-standing temples","La capital más pequeña de la Unión Europea","The EU's smallest capital"],
+MD:[2.5,"Leu moldavo (MDL)","Moldovan leu (MDL)","Rumano","Romanian","Tiene las bodegas de vino más grandes del mundo","Has the world's largest wine cellars","Famosa por sus parques y jardines","Famous for its parks and gardens"],
+MC:[0.04,"Euro (EUR)","Euro (EUR)","Francés","French","El segundo país más pequeño del mundo","The world's second-smallest country","Sede del Gran Premio de Fórmula 1","Hosts the Formula 1 Grand Prix"],
+ME:[0.6,"Euro (EUR)","Euro (EUR)","Montenegrino","Montenegrin","Tiene la bahía más bonita del Adriático","Home to the most beautiful bay in the Adriatic","Capital; Budva es el centro turístico","Capital; Budva is the tourist hub"],
+NO:[5.5,"Corona noruega (NOK)","Norwegian krone (NOK)","Noruego","Norwegian","Tiene el mayor fondo soberano del mundo","Has the world's largest sovereign wealth fund","Rodeada de bosques y fiordos","Surrounded by forests and fjords"],
+NL:[17.8,"Euro (EUR)","Euro (EUR)","Neerlandés","Dutch","El mayor exportador de flores del mundo","The world's largest flower exporter","Tiene más bicicletas que habitantes","Has more bikes than people"],
+PL:[38,"Esloti (PLN)","Złoty (PLN)","Polaco","Polish","El mayor productor de manzanas de la UE","The EU's largest apple producer","Reconstruida tras la II Guerra Mundial","Rebuilt after World War II"],
+PT:[10.4,"Euro (EUR)","Euro (EUR)","Portugués","Portuguese","El mayor productor mundial de corcho","The world's largest cork producer","Una de las capitales más antiguas de Europa","One of Europe's oldest cities"],
+GB:[68,"Libra esterlina (GBP)","Pound sterling (GBP)","Inglés","English","Cuna de Shakespeare y de la Revolución Industrial","Home of Shakespeare and the Industrial Revolution","Tiene el metro más antiguo del mundo","Has the world's oldest underground railway"],
+RO:[19,"Leu rumano (RON)","Romanian leu (RON)","Rumano","Romanian","Tiene una de las carreteras más espectaculares del mundo","Has one of the world's most spectacular roads","Tiene el edificio más pesado del mundo","Has the world's heaviest building"],
+RU:[144,"Rublo ruso (RUB)","Russian ruble (RUB)","Ruso","Russian","El país más grande del mundo","The largest country in the world","Tiene el metro más bonito del mundo","Has the world's most beautiful metro"],
+SM:[0.03,"Euro (EUR)","Euro (EUR)","Italiano","Italian","La república más antigua del mundo (301)","The world's oldest republic (301)","Capital en el monte Titano","Capital on Mount Titano"],
+RS:[6.7,"Dinar serbio (RSD)","Serbian dinar (RSD)","Serbio","Serbian","Uno de los mayores productores de frambuesas del mundo","Among the world's top raspberry producers","Una de las ciudades más antiguas de Europa","One of Europe's oldest cities"],
+SE:[10.5,"Corona sueca (SEK)","Swedish krona (SEK)","Sueco","Swedish","Cuna de Spotify, IKEA y Volvo","Home of Spotify, IKEA and Volvo","Construida sobre 14 islas","Built across 14 islands"],
+CH:[8.8,"Franco suizo (CHF)","Swiss franc (CHF)","Alemán, francés, italiano y romanche","German, French, Italian & Romansh","El país más innovador del mundo","The world's most innovative country","Su símbolo heráldico es un oso","Its heraldic symbol is a bear"],
+UA:[38,"Grivna (UAH)","Hryvnia (UAH)","Ucraniano","Ukrainian","El país más grande totalmente dentro de Europa","The largest country entirely within Europe","Hogar de la catedral de Santa Sofía","Home of Saint Sophia's Cathedral"],
+
+AG:[0.1,"Dólar del Caribe Oriental (XCD)","East Caribbean dollar (XCD)","Inglés","English","Tiene 365 playas, una para cada día","Has 365 beaches, one for each day","Capital con la catedral barroca más antigua","Has the oldest baroque cathedral in the region"],
+BS:[0.4,"Dólar bahameño (BSD)","Bahamian dollar (BSD)","Inglés","English","Tiene algunas de las aguas más claras del mundo","Home to some of the world's clearest waters","Capital en la isla de Nueva Providencia","Capital on New Providence island"],
+BB:[0.28,"Dólar barbadense (BBD)","Barbadian dollar (BBD)","Inglés","English","Cuna de la cantante Rihanna","Birthplace of the singer Rihanna","Capital Patrimonio de la Humanidad","A UNESCO World Heritage capital"],
+BZ:[0.4,"Dólar beliceño (BZD)","Belize dollar (BZD)","Inglés","English","Tiene el segundo arrecife más grande del mundo","Has the world's second-largest barrier reef","Una de las capitales más pequeñas del mundo","One of the world's smallest capitals"],
+CA:[40,"Dólar canadiense (CAD)","Canadian dollar (CAD)","Inglés y francés","English & French","Tiene la costa más larga del mundo","Has the world's longest coastline","Tiene la pista de patinaje más larga del mundo","Has the world's longest skating rink"],
+CR:[5.2,"Colón costarricense (CRC)","Costa Rican colón (CRC)","Español","Spanish","Abolió su ejército en 1948","Abolished its army in 1948","El centro cultural del país","The country's cultural hub"],
+CU:[11,"Peso cubano (CUP)","Cuban peso (CUP)","Español","Spanish","La isla más grande del Caribe","The largest island in the Caribbean","Famosa por sus autos clásicos de los años 50","Famous for its 1950s classic cars"],
+DM:[0.07,"Dólar del Caribe Oriental (XCD)","East Caribbean dollar (XCD)","Inglés","English","Tiene un lago en ebullición","Home to the Boiling Lake","Conocida por su mercado de especias","Known for its spice market"],
+SV:[6.3,"Dólar estadounidense (USD)","US dollar (USD)","Español","Spanish","Primer país en adoptar el bitcoin como moneda","The first country to adopt Bitcoin as legal tender","Tiene un volcán activo a su lado","Has an active volcano next door"],
+US:[335,"Dólar estadounidense (USD)","US dollar (USD)","Inglés","English","La mayor economía del mundo","The world's largest economy","Capital planificada; no pertenece a ningún estado","A planned capital; it belongs to no state"],
+GD:[0.11,"Dólar del Caribe Oriental (XCD)","East Caribbean dollar (XCD)","Inglés","English","Conocida como la 'isla de las especias'","Known as the 'Isle of Spice'","Puerto natural en forma de herradura","A horseshoe-shaped natural harbour"],
+GT:[18,"Quetzal (GTQ)","Quetzal (GTQ)","Español","Spanish","Corazón de la civilización maya","Heart of the Maya civilization","La capital más poblada de Centroamérica","The most populous capital in Central America"],
+HT:[11.5,"Gourde (HTG)","Gourde (HTG)","Criollo haitiano y francés","Haitian Creole & French","La primera república negra independiente (1804)","The first independent Black republic (1804)","Reconstruida tras el terremoto de 2010","Rebuilt after the 2010 earthquake"],
+HN:[10.5,"Lempira (HNL)","Lempira (HNL)","Español","Spanish","Tiene el reloj más antiguo de América","Has the oldest clock in the Americas","Capital en un valle montañoso","Capital in a mountain valley"],
+JM:[2.8,"Dólar jamaiquino (JMD)","Jamaican dollar (JMD)","Inglés y patois","English & Patois","Cuna del reggae y de Usain Bolt","Birthplace of reggae and Usain Bolt","Hogar del museo de Bob Marley","Home of the Bob Marley Museum"],
+MX:[129,"Peso mexicano (MXN)","Mexican peso (MXN)","Español","Spanish","Uno de los países con más sitios UNESCO del mundo","Among the countries with the most UNESCO sites","Una de las ciudades más grandes del mundo","One of the world's largest cities"],
+NI:[6.9,"Córdoba (NIO)","Córdoba (NIO)","Español","Spanish","Tiene el lago más grande de Centroamérica","Home to Central America's largest lake","Reconstruida tras el terremoto de 1972","Rebuilt after the 1972 earthquake"],
+PA:[4.5,"Balboa y dólar (PAB/USD)","Balboa & US dollar (PAB/USD)","Español","Spanish","Su canal une los océanos Atlántico y Pacífico","Its canal links the Atlantic and Pacific","La primera ciudad europea en el Pacífico americano","The first European city on the American Pacific"],
+DO:[11,"Peso dominicano (DOP)","Dominican peso (DOP)","Español","Spanish","Tiene el pico más alto del Caribe","Home to the Caribbean's highest peak","La ciudad colonial más antigua de América","The oldest colonial city in the Americas"],
+KN:[0.05,"Dólar del Caribe Oriental (XCD)","East Caribbean dollar (XCD)","Inglés","English","El país más pequeño de América","The smallest country in the Americas","Capital en la isla de San Cristóbal","Capital on Saint Kitts island"],
+VC:[0.1,"Dólar del Caribe Oriental (XCD)","East Caribbean dollar (XCD)","Inglés","English","Escenario de 'Piratas del Caribe'","A filming location for 'Pirates of the Caribbean'","Tiene jardines botánicos de 1765","Has botanical gardens from 1765"],
+LC:[0.18,"Dólar del Caribe Oriental (XCD)","East Caribbean dollar (XCD)","Inglés y criollo","English & Creole","El único país del mundo nombrado por una mujer","The only country in the world named after a woman","Entre montañas y mar","Nestled between mountains and sea"],
+TT:[1.5,"Dólar de Trinidad y Tobago (TTD)","Trinidad and Tobago dollar (TTD)","Inglés","English","Cuna del steelpan y del limbo","Birthplace of the steelpan and limbo","El carnaval más famoso del Caribe","The Caribbean's most famous carnival"],
+
+AR:[46,"Peso argentino (ARS)","Argentine peso (ARS)","Español","Spanish","Tiene el pico más alto de América, el Aconcagua","Home to Aconcagua, the Americas' highest peak","Hogar del Teatro Colón","Home of the Colón Theatre"],
+BO:[12,"Boliviano (BOB)","Boliviano (BOB)","Español y 36 idiomas","Spanish and 36 languages","Tiene el mayor salar del mundo, Uyuni","Home to Salar de Uyuni, the world's largest salt flat","Capital constitucional; La Paz es sede de gobierno","Constitutional capital; La Paz hosts the government"],
+BR:[216,"Real (BRL)","Real (BRL)","Portugués","Portuguese","El país más grande de Sudamérica","The largest country in South America","Capital planificada, inaugurada en 1960","A planned capital inaugurated in 1960"],
+CL:[19.5,"Peso chileno (CLP)","Chilean peso (CLP)","Español","Spanish","Tiene el desierto más árido del mundo, Atacama","Home to the Atacama, the driest desert on Earth","A los pies de la cordillera de los Andes","Beneath the Andes mountains"],
+CO:[52,"Peso colombiano (COP)","Colombian peso (COP)","Español","Spanish","El mayor productor de esmeraldas del mundo","The world's largest emerald producer","Capital a 2.640 m de altitud","Capital at 2,640 m elevation"],
+EC:[18,"Dólar estadounidense (USD)","US dollar (USD)","Español","Spanish","Tiene las islas Galápagos","Home to the Galápagos Islands","A 2.850 m, junto a la línea ecuatorial","At 2,850 m, right by the equator"],
+GY:[0.8,"Dólar guyanés (GYD)","Guyanese dollar (GYD)","Inglés","English","El único país de Sudamérica con inglés oficial","South America's only English-speaking country","Tiene una de las catedrales de madera más altas","Has one of the tallest wooden churches"],
+PY:[7.4,"Guaraní (PYG)","Guaraní (PYG)","Español y guaraní","Spanish & Guaraní","Su presa de Itaipú es una de las mayores del mundo","Its Itaipú Dam is one of the world's largest","Una de las capitales más antiguas de Sudamérica","One of South America's oldest cities"],
+PE:[34,"Sol (PEN)","Sol (PEN)","Español, quechua y aimara","Spanish, Quechua & Aymara","Hogar de Machu Picchu","Home of Machu Picchu","Una de las capitales gastronómicas del mundo","One of the world's great food capitals"],
+SR:[0.6,"Dólar surinamés (SRD)","Surinamese dollar (SRD)","Neerlandés","Dutch","El país más boscoso del mundo (93%)","The world's most forested country (93%)","Arquitectura colonial holandesa","Colonial Dutch architecture"],
+UY:[3.4,"Peso uruguayo (UYU)","Uruguayan peso (UYU)","Español","Spanish","Primer país del mundo en legalizar el cannabis","The first country to legalize cannabis","Tiene una de las ramblas más largas del mundo","Has one of the world's longest promenades"],
+VE:[28,"Bolívar (VES)","Bolívar (VES)","Español","Spanish","Tiene el salto de agua más alto del mundo, el Ángel","Home to Angel Falls, the world's highest waterfall","Tiene uno de los teleféricos más altos del mundo","Has one of the world's highest cable cars"],
+
+AU:[26,"Dólar australiano (AUD)","Australian dollar (AUD)","Inglés","English","El único país que también es un continente","The only country that is also a continent","Capital planificada; Sídney y Melbourne son mayores","A planned capital; Sydney and Melbourne are bigger"],
+FJ:[0.9,"Dólar fiyiano (FJD)","Fijian dollar (FJD)","Inglés, fiyiano e hindi","English, Fijian & Hindi","Un archipiélago de más de 330 islas","An archipelago of over 330 islands","Capital en la isla de Viti Levu","Capital on Viti Levu island"],
+KI:[0.13,"Dólar australiano (AUD)","Australian dollar (AUD)","Gilbertés e inglés","Gilbertese & English","El único país en los cuatro hemisferios","The only country in all four hemispheres","Capital en un atolón muy denso","Capital on a densely packed atoll"],
+MH:[0.04,"Dólar estadounidense (USD)","US dollar (USD)","Marshalés e inglés","Marshallese & English","Sus islas incluyen el atolón Bikini","Its islands include Bikini Atoll","Capital en un atolón de 64 islotes","Capital on an atoll of 64 islets"],
+FM:[0.1,"Dólar estadounidense (USD)","US dollar (USD)","Inglés","English","Hogar de las ruinas de Nan Madol","Home to the ruins of Nan Madol","Capital en la isla de Pohnpei","Capital on Pohnpei island"],
+NR:[0.01,"Dólar australiano (AUD)","Australian dollar (AUD)","Nauruano e inglés","Nauruan & English","El país más pequeño de Oceanía","The smallest country in Oceania","No hay capital oficial; Yaren es el distrito principal","No official capital; Yaren is the main district"],
+NZ:[5.2,"Dólar neozelandés (NZD)","New Zealand dollar (NZD)","Inglés y maorí","English & Māori","El primer país en dar el voto a las mujeres (1893)","The first country to give women the vote (1893)","La capital más austral del mundo","The world's southernmost capital"],
+PW:[0.02,"Dólar estadounidense (USD)","US dollar (USD)","Palaosano e inglés","Palauan & English","Primer país en prohibir protectores solares dañinos","The first country to ban reef-toxic sunscreen","La capital más pequeña del mundo","The world's smallest capital"],
+PG:[10,"Kina (PGK)","Kina (PGK)","Tok pisin, inglés y hiri motu","Tok Pisin, English & Hiri Motu","Tiene más de 800 idiomas","Home to over 800 languages","Tiene el único aeropuerto internacional del país","Has the country's only international airport"],
+WS:[0.22,"Tala (WST)","Tala (WST)","Samoano e inglés","Samoan & English","El primer país del Pacífico en independizarse (1962)","The first Pacific nation to gain independence (1962)","Capital en la isla de Upolu","Capital on Upolu island"],
+SB:[0.7,"Dólar de las Islas Salomón (SBD)","Solomon Islands dollar (SBD)","Inglés","English","Casi 1.000 islas y escenario de la II Guerra Mundial","Nearly 1,000 islands and a WWII battleground","Capital en la isla de Guadalcanal","Capital on Guadalcanal"],
+TO:[0.1,"Pa'anga (TOP)","Paʻanga (TOP)","Tongano e inglés","Tongan & English","La única monarquía del Pacífico","The Pacific's only monarchy","Capital en la isla de Tongatapu","Capital on Tongatapu island"],
+TV:[0.01,"Dólar australiano (AUD)","Australian dollar (AUD)","Tuvaluano e inglés","Tuvaluan & English","El cuarto país más pequeño del mundo","The world's fourth-smallest country","Capital en un atolón de 33 islotes","Capital on an atoll of 33 islets"],
+VU:[0.33,"Vatu (VUV)","Vatu (VUV)","Bislama, inglés y francés","Bislama, English & French","Tiene uno de los volcanes más activos del mundo","Home to one of the world's most active volcanoes","Capital en la isla de Éfaté","Capital on Éfaté island"]
+};
+
+/* Aliases extra (además de los nombres oficiales en ambos idiomas) */
+const ALIASES = {
+  US:{n:["usa","eeuu","eua","estados unidos de america","united states of america"],c:["washington","washington dc","washington d.c."]},
+  MX:{c:["cdmx","mexico df","df"]},
+  IN:{c:["delhi"]},
+  GT:{c:["guatemala"]},
+  PA:{c:["panama"]},
+  MM:{n:["burma"]},
+  SZ:{n:["swaziland","suazilandia"]},
+  CZ:{n:["republica checa","czech republic"]},
+  GB:{n:["uk","gran bretana","great britain","england","inglaterra","reino unido","united kingdom"]},
+  MK:{n:["macedonia"]},
+  CD:{n:["rd congo","congo kinshasa","congo rdc","dr congo","democratic republic of congo"]},
+  CG:{n:["congo brazzaville","republic of congo"]},
+  CI:{n:["cote d ivoire","ivory coast"]},
+  TL:{n:["timor leste","east timor"]},
+  NL:{n:["holland","holanda"]},
+  CV:{n:["cape verde"]},
+  KP:{n:["dprk"]},
+  KR:{n:["korea"]},
+  AE:{n:["uae","emiratos arabes"]},
+  BA:{n:["bosnia"]},
+  KN:{n:["st kitts and nevis","saint kitts & nevis"]},
+  VC:{n:["st vincent","saint vincent"]},
+  LC:{n:["st lucia"]},
+  ST:{n:["sao tome","sao tome and principe"]},
+  TR:{n:["turkey"]},
+};
+
+/* =========================================================
+   BUILD
+   ========================================================= */
+const DATA = RAW.map(r=>{
+  const f = FACTS[r[5]] || [0,"—","—","—","—","—","—","—","—"];
+  return {es:r[0], en:r[1], capEs:r[2], capEn:r[3], continent:r[4], code:r[5], f:f};
+});
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function flagImgUrl(code){ return "https://flagcdn.com/"+code.toLowerCase()+".svg"; }
+function flagImgTag(code, name, extraClass){
+  return '<img class="flag-img'+(extraClass?" "+extraClass:"")+'" src="'+flagImgUrl(code)+'" alt="Bandera de '+name+'" loading="lazy">';
+}
+function normalize(s){
+  return (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase().replace(/[.,'’`´\-]/g," ").replace(/\s+/g," ").trim();
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function sample(arr,n){ return shuffle(arr).slice(0,n); }
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function daysSinceEpoch(){
+  const d = new Date();
+  const local = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.floor(local.getTime()/86400000);
+}
+function dailyCountry(){
+  const idx = ((daysSinceEpoch() % DATA.length) + DATA.length) % DATA.length;
+  return DATA[idx];
+}
+function escapeAttr(s){ return String(s).replace(/"/g,"&quot;"); }
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  screen:"home",
+  config:{ mode:"flags", scope:"global", difficulty:"easy", count:10, lang:"es" },
+  quiz:null,
+  daily:{ loading:true, record:null, streak:{count:0,lastDate:null}, guessCountry:"", guessCapital:"" },
+};
+
+/* =========================================================
+   LOCALIZATION HELPERS
+   ========================================================= */
+function T(){ return STR[state.config.lang]; }
+function isEN(){ return state.config.lang === "en"; }
+function cName(c){ return isEN() ? c.en : c.es; }
+function cCap(c){ return isEN() ? c.capEn : c.capEs; }
+function continentName(code){ return CONTINENTS[code][isEN()?"en":"es"]; }
+function fmtPop(n){
+  const s = (n).toLocaleString(isEN()?"en-US":"es-ES");
+  return isEN() ? s+" million" : s+" millones";
+}
+function popStr(c){ return fmtPop(c.f[0]); }
+function curStr(c){ return isEN() ? c.f[2] : c.f[1]; }
+function langStr(c){ return isEN() ? c.f[4] : c.f[3]; }
+function hiStr(c){ return isEN() ? c.f[6] : c.f[5]; }
+function capHiStr(c){ return isEN() ? c.f[8] : c.f[7]; }
+
+function matchesCountry(input, c){
+  const n = normalize(input);
+  if(!n) return false;
+  if(n === normalize(c.es) || n === normalize(c.en)) return true;
+  const a = ALIASES[c.code];
+  if(a && a.n && a.n.some(x=>normalize(x)===n)) return true;
+  return false;
+}
+function matchesCapital(input, c){
+  const n = normalize(input);
+  if(!n) return false;
+  if(n === normalize(c.capEs) || n === normalize(c.capEn)) return true;
+  const a = ALIASES[c.code];
+  if(a && a.c && a.c.some(x=>normalize(x)===n)) return true;
+  return false;
+}
+
+/* =========================================================
+   STORAGE
+   ========================================================= */
+async function loadDaily(){
+  const key = "daily-progress:" + todayKey();
+  let record = null, streak = {count:0,lastDate:null};
+  try{
+    const r = await window.storage.get(key, false);
+    if(r && r.value) record = JSON.parse(r.value);
+  }catch(e){ record = null; }
+  try{
+    const s = await window.storage.get("daily-streak", false);
+    if(s && s.value) streak = JSON.parse(s.value);
+  }catch(e){}
+  state.daily.record = record;
+  state.daily.streak = streak;
+  state.daily.loading = false;
+  render();
+}
+async function saveDailyRecord(record){
+  const key = "daily-progress:" + todayKey();
+  try{ await window.storage.set(key, JSON.stringify(record), false); }catch(e){}
+}
+async function saveStreak(streak){
+  try{ await window.storage.set("daily-streak", JSON.stringify(streak), false); }catch(e){}
+}
+
+/* =========================================================
+   POOL / QUIZ BUILDING
+   ========================================================= */
+function poolFor(scope){
+  return scope === "global" ? DATA : DATA.filter(c => c.continent === scope);
+}
+function valOf(c, key){ return key === "name" ? cName(c) : cCap(c); }
+function buildOptions(correctValue, key, pool, globalFallback){
+  let source = pool.filter(c => valOf(c,key) !== correctValue);
+  if(source.length < 3) source = globalFallback.filter(c => valOf(c,key) !== correctValue);
+  const distractors = sample(source, 3).map(c => valOf(c,key));
+  return shuffle([correctValue, ...distractors]);
+}
+function countFor(pool){
+  const c = state.config.count;
+  if(c === "all") return pool.length;
+  return Math.min(c, pool.length);
+}
+function buildQuestions(){
+  const { mode, scope, difficulty } = state.config;
+  const pool = poolFor(scope);
+  const n = countFor(pool);
+  const chosen = sample(pool, n);
+  return chosen.map(country => {
+    const q = { country, mode, difficulty };
+    if(difficulty === "easy"){
+      if(mode === "flags" || mode === "both") q.countryOptions = buildOptions(cName(country), "name", pool, DATA);
+      if(mode === "capitals" || mode === "both") q.capitalOptions = buildOptions(cCap(country), "capital", pool, DATA);
+    }
+    return q;
+  });
+}
+
+/* =========================================================
+   BACKGROUND
+   ========================================================= */
+function renderFlagBackground(){
+  const pool = poolFor(state.config.scope);
+  const el = document.getElementById("flag-bg");
+  if(!el || !pool.length) return;
+
+  // Máximo de banderas para que no queden diminutas, pero usando solo únicas.
+  // Si el continente tiene menos, se usan todas.
+  const MAX = 36;
+  const items = shuffle(pool).slice(0, Math.min(pool.length, MAX));
+  const n = items.length;
+
+  // Tamaño "real" un poco más grande que la pantalla para que las rotaciones no dejen huecos.
+  const w = window.innerWidth + 80;
+  const h = window.innerHeight + 80;
+
+  // Columnas/filas para que la rejilla encaje con la proporción de la pantalla.
+  const cols = Math.max(1, Math.round(Math.sqrt(n * w / h)));
+  const rows = Math.ceil(n / cols);
+
+  el.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+  el.style.gridTemplateRows    = 'repeat(' + rows + ', 1fr)';
+
+  el.innerHTML = items.map(c => {
+    const rot = (Math.random() * 30 - 15).toFixed(1);      // -15° a +15°
+    const sc  = (0.9 + Math.random() * 0.25).toFixed(2);   // 90% a 115%
+    return '<img src="' + flagImgUrl(c.code) + '" alt="" loading="lazy" ' +
+           'style="transform:rotate(' + rot + 'deg) scale(' + sc + ');">';
+  }).join("");
+}
+
+// Redibujar al redimensionar (con debounce para no spamear)
+let __flagBgResizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(__flagBgResizeTimer);
+  __flagBgResizeTimer = setTimeout(renderFlagBackground, 200);
+});
+
+
+/* =========================================================
+   RENDER ROOT
+   ========================================================= */
+function render(){
+  const app = document.getElementById("app");
+  document.body.classList.toggle("hard-mode", state.config.difficulty === "hard");
+  document.documentElement.lang = state.config.lang;
+  let inner = "";
+  if(state.screen === "home") inner = renderHome();
+  else if(state.screen === "quiz") inner = renderQuiz();
+  else if(state.screen === "results") inner = renderResults();
+  else if(state.screen === "daily") inner = renderDaily();
+  app.innerHTML = '<div class="screen-enter">'+inner+'</div>';
+  attachHandlers();
+}
+
+/* =========================================================
+   HOME
+   ========================================================= */
+function modeCard(id, icon, title, sub){
+  const active = state.config.mode === id ? " active" : "";
+  return '<button class="mode-card'+active+'" data-action="set-mode" data-value="'+id+'">'+
+    '<div class="mode-icon">'+icon+'</div>'+
+    '<div class="mode-text"><strong>'+title+'</strong><span>'+sub+'</span></div>'+
+  '</button>';
+}
+function langToggleHtml(){
+  const l = state.config.lang;
+  return '<div class="lang-toggle">'+
+    '<button class="lang-btn'+(l==="es"?" active":"")+'" data-action="set-lang" data-value="es">ES</button>'+
+    '<button class="lang-btn'+(l==="en"?" active":"")+'" data-action="set-lang" data-value="en">EN</button>'+
+  '</div>';
+}
+
+function renderHome(){
+  const t = T();
+  const d = state.daily;
+  const dc = dailyCountry();
+  const solvedToday = d.record && d.record.solved;
+  const failedToday = d.record && d.record.givenUp;
+  const playedToday = solvedToday || failedToday;
+  const streakTxt = d.streak.count > 0 ? t.streak(d.streak.count) : t.noStreak;
+
+  let stampInner;
+  if(d.loading){
+    stampInner = '<p class="stamp-sub">'+t.loadingDaily+'</p>';
+  } else if(playedToday){
+    const flag = flagImgTag(dc.code, cName(dc));
+    stampInner = '<div class="stamp-body">'+
+        '<div class="stamp-flag">'+flag+'</div>'+
+        '<div>'+
+          '<p class="stamp-title">'+(solvedToday ? t.dailySolved : t.dailyGone)+'</p>'+
+          '<p class="stamp-sub">'+(solvedToday ? t.dailyComeBack : t.dailyAnswerWas(cName(dc), cCap(dc)))+'</p>'+
+        '</div>'+
+      '</div>'+
+      '<button class="btn btn-ghost btn-block btn-daily" data-action="open-daily">'+t.viewDaily+'</button>';
+  } else {
+    stampInner = '<div class="stamp-body">'+
+        '<div class="stamp-flag">🌍</div>'+
+        '<div>'+
+          '<p class="stamp-title">'+t.dailyTitle+'</p>'+
+          '<p class="stamp-sub">'+t.dailySub+'</p>'+
+        '</div>'+
+      '</div>'+
+      '<button class="btn btn-gold btn-block btn-daily" data-action="open-daily">'+t.playDaily+'</button>';
+  }
+
+  const scopeChips = ['<button class="chip'+(state.config.scope==="global"?" active":"")+'" data-action="set-scope" data-value="global">🌐 '+t.global+'</button>']
+    .concat(Object.keys(CONTINENTS).map(code =>
+      '<button class="chip'+(state.config.scope===code?" active":"")+'" data-action="set-scope" data-value="'+code+'">'+continentName(code)+'</button>'
+    )).join("");
+
+  const poolSize = poolFor(state.config.scope).length;
+  const presets = [10,20,30,50];
+  const isPreset = typeof state.config.count === "number" && presets.indexOf(state.config.count) !== -1;
+  const countChips = presets.map(n =>
+    '<button class="chip'+((state.config.count===n)?" active":"")+'" data-action="set-count" data-value="'+n+'">'+n+'</button>'
+  ).join("") + '<button class="chip'+((state.config.count==="all")?" active":"")+'" data-action="set-count" data-value="all">'+t.all+'</button>';
+
+  return langToggleHtml()+
+  '<div class="hero">'+
+    '<svg class="hero-compass" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+      '<circle cx="50" cy="50" r="46" stroke="#F1E8D2" stroke-width="1.2"/>'+
+      '<circle cx="50" cy="50" r="30" stroke="#F1E8D2" stroke-width="1"/>'+
+      '<path d="M50 6 L54 46 L50 50 L46 46 Z" fill="#F1E8D2"/>'+
+      '<path d="M50 94 L54 54 L50 50 L46 54 Z" fill="#F1E8D2"/>'+
+    '</svg>'+
+    '<p class="hero-eyebrow">'+t.eyebrow+'</p>'+
+    '<h1>Atlasdle</h1>'+
+    '<p>'+t.tagline+'</p>'+
+  '</div>'+
+
+  '<div class="section">'+
+    '<div class="stamp-card">'+
+      '<div class="stamp-top">'+
+        '<span class="stamp-badge">'+t.dailyBadge+'</span>'+
+        '<span class="streak-pill">'+streakTxt+'</span>'+
+      '</div>'+
+      stampInner+
+    '</div>'+
+  '</div>'+
+
+  '<div class="section">'+
+    '<h2>'+t.modeTitle+'</h2>'+
+    '<p class="hint">'+t.modeHint+'</p>'+
+    '<div class="mode-grid">'+
+      modeCard("flags","🏳️",t.mFlags,t.mFlagsSub)+
+      modeCard("capitals","🏛️",t.mCaps,t.mCapsSub)+
+      modeCard("both","🗺️",t.mBoth,t.mBothSub)+
+    '</div>'+
+  '</div>'+
+
+  '<div class="section">'+
+    '<h2>'+t.regionTitle+'</h2>'+
+    '<p class="hint">'+t.regionHint+'</p>'+
+    '<div class="chip-row">'+scopeChips+'</div>'+
+  '</div>'+
+
+  '<div class="section">'+
+    '<h2>'+t.lenTitle+'</h2>'+
+    '<p class="hint">'+t.lenHint+'</p>'+
+    '<div class="chip-row">'+countChips+'</div>'+
+    '<div class="count-row">'+
+      '<input class="count-input" id="custom-count" type="number" min="1" max="'+poolSize+'" placeholder="'+t.customPh+'" value="'+(isPreset || state.config.count==="all" ? "" : state.config.count)+'">'+
+      '<span class="count-avail">'+t.available(poolSize)+'</span>'+
+    '</div>'+
+  '</div>'+
+
+  '<div class="section">'+
+    '<h2>'+t.diffTitle+'</h2>'+
+    '<p class="hint">'+t.diffHint+'</p>'+
+    '<div class="toggle-pair">'+
+      '<button class="toggle-opt'+(state.config.difficulty==="easy"?" active":"")+'" data-action="set-difficulty" data-value="easy">'+
+        '<strong>'+t.easy+'</strong><span>'+t.easySub+'</span>'+
+      '</button>'+
+      '<button class="toggle-opt'+(state.config.difficulty==="hard"?" active danger":"")+'" data-action="set-difficulty" data-value="hard">'+
+        '<strong>'+t.hard+'</strong><span>'+t.hardSub+'</span>'+
+      '</button>'+
+    '</div>'+
+  '</div>'+
+
+  '<div class="start-bar">'+
+    '<button class="btn btn-primary btn-block" data-action="start-quiz">'+t.start+'</button>'+
+  '</div>'+
+
+  '<footer>'+t.footer+'</footer>';
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+function currentQuestion(){ return state.quiz.questions[state.quiz.index]; }
+
+function fieldClass(feedback, field){
+  if(!feedback) return "";
+  return feedback.fields && feedback.fields[field] ? (" " + feedback.fields[field]) : "";
+}
+
+function optionButtonHtml(opt, field){
+  const sel = state.quiz.selection[field];
+  const feedback = state.quiz.feedback;
+  let cls = "option-btn";
+  if(feedback){
+    const q = currentQuestion();
+    const correctVal = field === "country" ? cName(q.country) : cCap(q.country);
+    if(opt === correctVal) cls += " correct";
+    else if(opt === sel) cls += " wrong";
+  } else if(opt === sel){
+    cls += " selected";
+  }
+  return '<button class="'+cls+'" data-action="select-option" data-field="'+field+'" data-value="'+escapeAttr(opt)+'" '+(feedback?"disabled":"")+'>'+opt+'</button>';
+}
+
+function factsHtml(c, mode){
+  const t = T();
+  const showCity = mode === "capitals" || mode === "both";
+  let html = "";
+  if(showCity){
+    html += '<div class="facts-card">'+
+      '<p class="facts-title city">'+t.aboutCity+'</p>'+
+      '<div class="fact-row"><span>'+t.country+'</span><strong>'+cName(c)+'</strong></div>'+
+      '<div class="fact-row"><span>'+t.cityFact+'</span><strong>'+capHiStr(c)+'</strong></div>'+
+    '</div>';
+  }
+  html += '<div class="facts-card">'+
+    '<p class="facts-title">'+t.aboutCountry+'</p>'+
+    '<div class="fact-row"><span>'+t.population+'</span><strong>'+popStr(c)+'</strong></div>'+
+    '<div class="fact-row"><span>'+t.currency+'</span><strong>'+curStr(c)+'</strong></div>'+
+    '<div class="fact-row"><span>'+t.language+'</span><strong>'+langStr(c)+'</strong></div>'+
+    '<div class="fact-row"><span>'+t.fact+'</span><strong>'+hiStr(c)+'</strong></div>'+
+  '</div>';
+  return html;
+}
+
+function renderQuiz(){
+  const t = T();
+  const q = currentQuestion();
+  const total = state.quiz.questions.length;
+  const idx = state.quiz.index + 1;
+  const pct = Math.round((state.quiz.index / total) * 100);
+  const showFlag = q.mode === "flags" || q.mode === "both";
+  const feedback = state.quiz.feedback;
+
+  let promptHtml;
+  if(showFlag){
+    promptHtml = '<div class="big-flag">'+flagImgTag(q.country.code, cName(q.country))+'</div>'+
+      '<p class="card-question">'+(q.mode === "both" ? t.bothQ : t.whatCountry)+'</p>';
+  } else {
+    promptHtml = '<p class="card-eyebrow">'+t.country+'</p>'+
+      '<p class="card-name">'+cName(q.country)+'</p>'+
+      '<p class="card-question">'+t.whatCapital+'</p>';
+  }
+
+  let answerHtml = "";
+  const needCountry = q.mode === "flags" || q.mode === "both";
+  const needCapital = q.mode === "capitals" || q.mode === "both";
+
+  if(q.difficulty === "easy"){
+    if(needCountry){
+      answerHtml += '<span class="field-label">'+(q.mode==="both" ? t.country : "")+'</span><div class="option-list" data-field="country">';
+      answerHtml += q.countryOptions.map(opt => optionButtonHtml(opt, "country")).join("");
+      answerHtml += '</div>';
+    }
+    if(needCapital){
+      answerHtml += '<span class="field-label">'+(q.mode==="both" ? t.capital : "")+'</span><div class="option-list" data-field="capital">';
+      answerHtml += q.capitalOptions.map(opt => optionButtonHtml(opt, "capital")).join("");
+      answerHtml += '</div>';
+    }
+  } else {
+    if(needCountry){
+      answerHtml += '<span class="field-label">'+t.country+'</span>'+
+        '<input class="text-input'+fieldClass(feedback,"country")+'" id="input-country" type="text" placeholder="'+t.writeCountry+'" '+(feedback?"disabled":"")+' value="'+escapeAttr(state.quiz.draft.country||"")+'">';
+    }
+    if(needCapital){
+      answerHtml += '<span class="field-label">'+t.capital+'</span>'+
+        '<input class="text-input'+fieldClass(feedback,"capital")+'" id="input-capital" type="text" placeholder="'+t.writeCapital+'" '+(feedback?"disabled":"")+' value="'+escapeAttr(state.quiz.draft.capital||"")+'">';
+    }
+    if(!feedback) answerHtml += '<p class="input-note">'+t.note+'</p>';
+  }
+
+  let feedbackHtml = "";
+  if(feedback){
+    const cls = feedback.correct ? "ok" : "bad";
+    const label = feedback.correct
+      ? t.ok+' <span class="confetti-row"><span>🎉</span><span>✨</span><span>🎊</span></span>'
+      : t.bad;
+    let detail = "";
+    if(!feedback.correct){
+      const parts = [];
+      if(needCountry) parts.push(t.country+": "+cName(q.country));
+      if(needCapital) parts.push(t.capital+": "+cCap(q.country));
+      detail = '<span class="answer-line">'+parts.join(" · ")+'</span>';
+    }
+    feedbackHtml = '<div class="feedback-banner '+cls+'">'+label+detail+'</div>';
+  }
+
+  const canSubmit = q.difficulty === "easy"
+    ? (needCountry ? !!state.quiz.selection.country : true) && (needCapital ? !!state.quiz.selection.capital : true)
+    : true;
+
+  const actionHtml = !feedback
+    ? '<div class="action-bar"><button class="btn btn-primary btn-block" data-action="submit-answer" '+(canSubmit?"":"disabled")+'>'+t.check+'</button></div>'
+    : '<div class="action-bar"><button class="btn btn-primary btn-block" data-action="next-question">'+(idx < total ? t.next : t.seeResults)+'</button></div>';
+
+  const facts = feedback ? factsHtml(q.country, q.mode) : "";
+
+  return '<div class="quiz-top">'+
+      '<span class="quiz-progress">'+t.q+' '+idx+' '+t.of+' '+total+'</span>'+
+      '<span class="quiz-score">'+t.score+': '+state.quiz.score+'</span>'+
+    '</div>'+
+    '<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="card">'+promptHtml+'</div>'+
+    '<div class="answer-block">'+answerHtml+'</div>'+
+    feedbackHtml+
+    facts+
+    actionHtml+
+    '<div class="start-bar"><button class="btn btn-ghost btn-block" data-action="abort-quiz">'+t.exit+'</button></div>';
+}
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+function renderResults(){
+  const t = T();
+  const total = state.quiz.questions.length;
+  const score = state.quiz.score;
+  const pct = Math.round((score/total)*100);
+  let msg;
+  if(pct === 100) msg = t.perfect;
+  else if(pct >= 70) msg = t.great;
+  else if(pct >= 40) msg = t.onTrack;
+  else msg = t.keep;
+
+  const items = state.quiz.review.map(r =>
+    '<div class="review-item">'+
+      '<span class="mark">'+(r.correct ? "✅" : "❌")+'</span>'+
+      '<div class="txt">'+
+        '<strong>'+flagImgTag(r.country.code, cName(r.country), "flag-inline")+cName(r.country)+'</strong>'+
+        '<span>'+t.capital+': '+cCap(r.country)+' · '+continentName(r.country.continent)+'</span>'+
+      '</div>'+
+    '</div>'
+  ).join("");
+
+  return langToggleHtml()+
+  '<div class="result-hero">'+
+    '<p class="result-score">'+score+'/'+total+'</p>'+
+    '<p class="result-label">'+msg+'</p>'+
+  '</div>'+
+  '<div class="review-list">'+items+'</div>'+
+  '<div class="result-actions">'+
+    '<button class="btn btn-primary btn-block" data-action="retry-quiz">'+t.again+'</button>'+
+    '<button class="btn btn-ghost btn-block" data-action="go-home">'+t.changeCfg+'</button>'+
+  '</div>'+
+  '<footer>'+t.footer+'</footer>';
+}
+
+/* =========================================================
+   DAILY
+   ========================================================= */
+function renderDaily(){
+  const t = T();
+  const country = dailyCountry();
+  const d = state.daily;
+  const record = d.record || { attempts:0, guesses:[], solved:false, givenUp:false };
+  const maxAttempts = 4;
+  const done = record.solved || record.givenUp;
+
+  const hints = [];
+  if(record.attempts >= 1) hints.push(t.continent+": "+continentName(country.continent));
+  if(record.attempts >= 2) hints.push(t.startsWith(cName(country)[0]));
+  if(record.attempts >= 3) hints.push(t.capStartsWith(cCap(country)[0]));
+
+  const dots = Array.from({length:maxAttempts}).map((_,i)=>{
+    const g = record.guesses[i];
+    let cls = "attempt-dot";
+    if(g) cls += g.correct ? " used-ok" : " used-bad";
+    return '<span class="'+cls+'"></span>';
+  }).join("");
+
+  let body;
+  if(done){
+    body = '<div class="big-flag">'+flagImgTag(country.code, cName(country))+'</div>'+
+      '<p class="card-name">'+cName(country)+'</p>'+
+      '<p class="card-question">'+t.capital+': '+cCap(country)+'</p>'+
+      '<div class="feedback-banner '+(record.solved?"ok":"bad")+'" style="margin:16px 0 0;">'+
+        (record.solved ? t.solvedTomorrow+' <span class="confetti-row"><span>🎉</span><span>✨</span><span>🎊</span></span>' : t.noMoreTries)+
+      '</div>';
+  } else {
+    body = '<div class="big-flag">'+flagImgTag(country.code, cName(country))+'</div>'+
+      '<p class="card-question">'+t.writeBoth+'</p>'+
+      '<div class="attempts-row">'+dots+'</div>'+
+      (hints.length ? '<div class="hint-row">'+hints.map(h=>'<span class="hint-chip">'+h+'</span>').join("")+'</div>' : "");
+  }
+
+  const form = done ? "" :
+    '<div class="answer-block">'+
+      '<span class="field-label">'+t.country+'</span>'+
+      '<input class="text-input" id="daily-country" type="text" placeholder="'+t.writeCountry+'" value="'+escapeAttr(d.guessCountry||"")+'">'+
+      '<span class="field-label">'+t.capital+'</span>'+
+      '<input class="text-input" id="daily-capital" type="text" placeholder="'+t.writeCapital+'" value="'+escapeAttr(d.guessCapital||"")+'">'+
+      '<p class="input-note">'+t.note+' '+t.attempts(maxAttempts - record.attempts)+'</p>'+
+    '</div>'+
+    '<div class="action-bar">'+
+      '<button class="btn btn-primary btn-block" data-action="submit-daily">'+t.check+'</button>'+
+    '</div>';
+
+  const facts = done ? factsHtml(country, "both") : "";
+
+  return langToggleHtml()+
+  '<div class="quiz-top">'+
+    '<span class="quiz-progress">'+t.dailyChallenge+'</span>'+
+    '<span class="quiz-score">🔥 '+d.streak.count+'</span>'+
+  '</div>'+
+  '<div class="card">'+body+'</div>'+
+  form+
+  facts+
+  '<div class="start-bar"><button class="btn btn-ghost btn-block" data-action="go-home">'+t.backHome+'</button></div>';
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+function attachHandlers(){
+  const app = document.getElementById("app");
+  app.querySelectorAll("[data-action]").forEach(el => el.addEventListener("click", onAction));
+  const custom = document.getElementById("custom-count");
+  if(custom){
+    custom.addEventListener("change", ()=>{
+      const v = parseInt(custom.value, 10);
+      const max = poolFor(state.config.scope).length;
+      if(!isNaN(v) && v >= 1){
+        state.config.count = Math.min(v, max);
+        render();
+      } else if(custom.value === ""){
+        state.config.count = 10;
+        render();
+      }
+    });
+  }
+}
+
+function onAction(e){
+  const el = e.currentTarget;
+  const action = el.dataset.action;
+  const value = el.dataset.value;
+
+  if(action === "set-mode"){ state.config.mode = value; render(); }
+  else if(action === "set-scope"){ state.config.scope = value; render(); renderFlagBackground(); }
+  else if(action === "set-difficulty"){ state.config.difficulty = value; render(); }
+  else if(action === "set-count"){
+    state.config.count = value === "all" ? "all" : parseInt(value, 10);
+    render();
+  }
+  else if(action === "set-lang"){
+    state.config.lang = value;
+    render(); renderFlagBackground();
+  }
+  else if(action === "start-quiz"){ startQuiz(); }
+  else if(action === "select-option"){ selectOption(el.dataset.field, value); }
+  else if(action === "submit-answer"){ submitAnswer(); }
+  else if(action === "next-question"){ nextQuestion(); }
+  else if(action === "abort-quiz"){ state.screen = "home"; render(); }
+  else if(action === "retry-quiz"){ startQuiz(); }
+  else if(action === "go-home"){ state.screen = "home"; render(); }
+  else if(action === "open-daily"){ state.screen = "daily"; render(); }
+  else if(action === "submit-daily"){ submitDaily(); }
+}
+
+function startQuiz(){
+  const questions = buildQuestions();
+  state.quiz = { questions, index:0, score:0, review:[], feedback:null, selection:{country:null,capital:null}, draft:{country:"",capital:""} };
+  state.screen = "quiz";
+  render();
+}
+
+function selectOption(field, value){
+  if(state.quiz.feedback) return;
+  state.quiz.selection[field] = value;
+  render();
+}
+
+function submitAnswer(){
+  const q = currentQuestion();
+  const needCountry = q.mode === "flags" || q.mode === "both";
+  const needCapital = q.mode === "capitals" || q.mode === "both";
+  let countryOk = true, capitalOk = true;
+  const fields = {};
+
+  if(q.difficulty === "easy"){
+    if(needCountry) countryOk = state.quiz.selection.country === cName(q.country);
+    if(needCapital) capitalOk = state.quiz.selection.capital === cCap(q.country);
+  } else {
+    if(needCountry){
+      const el = document.getElementById("input-country");
+      const val = el ? el.value : "";
+      state.quiz.draft.country = val;
+      countryOk = matchesCountry(val, q.country);
+      fields.country = countryOk ? "correct" : "wrong";
+    }
+    if(needCapital){
+      const el = document.getElementById("input-capital");
+      const val = el ? el.value : "";
+      state.quiz.draft.capital = val;
+      capitalOk = matchesCapital(val, q.country);
+      fields.capital = capitalOk ? "correct" : "wrong";
+    }
+  }
+
+  const correct = countryOk && capitalOk;
+  if(correct) state.quiz.score++;
+  state.quiz.review.push({ country: q.country, correct });
+  state.quiz.feedback = { correct, fields };
+  render();
+}
+
+function nextQuestion(){
+  const total = state.quiz.questions.length;
+  if(state.quiz.index + 1 < total){
+    state.quiz.index++;
+    state.quiz.feedback = null;
+    state.quiz.selection = {country:null, capital:null};
+    state.quiz.draft = {country:"", capital:""};
+    render();
+  } else {
+    state.screen = "results";
+    render();
+  }
+}
+
+async function submitDaily(){
+  const country = dailyCountry();
+  const record = state.daily.record || { attempts:0, guesses:[], solved:false, givenUp:false };
+  const countryEl = document.getElementById("daily-country");
+  const capitalEl = document.getElementById("daily-capital");
+  const countryVal = countryEl ? countryEl.value : "";
+  const capitalVal = capitalEl ? capitalEl.value : "";
+  state.daily.guessCountry = countryVal;
+  state.daily.guessCapital = capitalVal;
+
+  const countryOk = matchesCountry(countryVal, country);
+  const capitalOk = matchesCapital(capitalVal, country);
+  const correct = countryOk && capitalOk;
+
+  record.attempts++;
+  record.guesses.push({ countryVal, capitalVal, correct });
+
+  const maxAttempts = 4;
+  if(correct) record.solved = true;
+  else if(record.attempts >= maxAttempts) record.givenUp = true;
+
+  state.daily.record = record;
+  await saveDailyRecord(record);
+
+  if(record.solved || record.givenUp){
+    const streak = state.daily.streak || {count:0,lastDate:null};
+    const today = todayKey();
+    if(record.solved){
+      const y = new Date(); y.setDate(y.getDate()-1);
+      const yKey = y.getFullYear()+"-"+String(y.getMonth()+1).padStart(2,"0")+"-"+String(y.getDate()).padStart(2,"0");
+      if(streak.lastDate === yKey) streak.count = streak.count + 1;
+      else streak.count = 1;
+      streak.lastDate = today;
+    } else {
+      streak.count = 0;
+      streak.lastDate = today;
+    }
+    state.daily.streak = streak;
+    await saveStreak(streak);
+  }
+
+  render();
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+render();
+loadDaily();
+renderFlagBackground();
+</script>
+</body>
+</html>
