@@ -523,10 +523,11 @@ button:focus-visible{outline:2px solid var(--title-teal-deep); outline-offset:2p
 <script src="https://www.highrevenueformat.com/a14c53b54e7514fc888cdad10bcec49c/invoke.js"></script>
 </div>
 
-<!-- ✅ Native Banner de Adsterra (fuera de #app, siempre visible al final) -->
-<div class="native-ad-wrap">
+  <div id="ads-feedback" style="display:none; margin:14px 22px 0;">
   <div id="container-44a8cddcbe4856844a54cee2d260caae"></div>
+  <script async="async" data-cfasync="false" src="https://pl31318883.profitableratecpmnetwork.com/44a8cddcbe4856844a54cee2d260caae/invoke.js"></script>
 </div>
+
 <script>
 /* =========================================================
    i18n
@@ -1200,6 +1201,7 @@ function render(){
   const app = document.getElementById("app");
   document.body.classList.toggle("hard-mode", state.config.difficulty === "hard");
   document.getElementById("ads-results").style.display = state.screen === "results" ? "block" : "none";
+  document.getElementById("ads-feedback").style.display = (state.screen === "quiz" && state.quiz && state.quiz.feedback) || (state.screen === "daily" && state.daily.record && (state.daily.record.solved || state.daily.record.givenUp)) ? "block" : "none";
   document.documentElement.lang = state.config.lang;
   let inner = "";
   if(state.screen === "home") inner = renderHome();
