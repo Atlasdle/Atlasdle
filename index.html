@@ -499,6 +499,30 @@ button:focus-visible{outline:2px solid var(--title-teal-deep); outline-offset:2p
 <div class="flag-bg-scrim" aria-hidden="true"></div>
 <div class="app" id="app"></div>
 
+  <script>
+  atOptions = {
+    'key' : '9e5cc6777dbcd847c0180729cf55df11',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/9e5cc6777dbcd847c0180729cf55df11/invoke.js"></script>
+
+  <div id="ads-results" style="display:none; margin:16px auto; max-width:300px;">
+  <script>
+  atOptions = {
+    'key' : 'a14c53b54e7514fc888cdad10bcec49c',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/a14c53b54e7514fc888cdad10bcec49c/invoke.js"></script>
+</div>
+
 <!-- ✅ Native Banner de Adsterra (fuera de #app, siempre visible al final) -->
 <div class="native-ad-wrap">
   <div id="container-44a8cddcbe4856844a54cee2d260caae"></div>
@@ -1175,6 +1199,8 @@ window.addEventListener("resize", () => {
 function render(){
   const app = document.getElementById("app");
   document.body.classList.toggle("hard-mode", state.config.difficulty === "hard");
+  document.getElementById("ads-results").style.display = state.screen === "results" ? "block" : "none";
+  let inner = "";
   document.documentElement.lang = state.config.lang;
   let inner = "";
   if(state.screen === "home") inner = renderHome();
